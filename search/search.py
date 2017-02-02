@@ -87,7 +87,80 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    print "Start:", problem.getStartState()
+    #print "getStartState returns a ", type(problem.getStartState()) # testing
+    #Output: type "tuple"
+    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    #print "getSuccessors returns a ", type(problem.getSuccessors(problem.getStartState()))
+    #Output: type "list"
+
+    startNode = problem.getStartState()
+    myList = util.Stack()
+    myList.push((startNode, [], [])) #position, visited, directions
+    testNode = myList.pop() #testing
+    #print "testNode = ", node
+    #print "testNode type is ", type(node)
+    #Output: type "tuple," which is like list except can't change contents
+    path = []
+    print "Path = ", path
+    myList.push(testNode)
+    # L := List of initial nodes
+    # 	(at any time, L is the list of nodes that have not been explored)
+    # If L = empty, then FAIL
+    # 	else pick a node n from L.
+    # If n is a goal node, STOP
+    #	return n and the path to it from an initial node.
+    # Otherwise, remove n from OPEN
+    #	put in in CLOSE
+    #	and for all children x of n,
+    #	if x is not in CLOSE,
+    #		add x to OPEN and keep path information
+    
+    while not myList.isEmpty():
+        node, visit, action = myList.pop()
+        #print "Path = ", path
+        
+        if problem.isGoalState(node): 
+            path += [action]
+            print "Path Final = ", path
+            return path
+        else: 
+            #testing
+            #pos, direc, value = problem.getSuccessors(node)
+            
+            #print "pos = ", pos
+            #print "direc = ", direc
+            #print "value = ", value
+            
+            print "\nnode =", node
+            print "visit =", visit
+            if node not in visit: #(to prevent redundancies)
+                #position of node, 'cause that's all we care about
+                visit.append(node)
+                print "visit should add", node
+                print "visit =", visit
+                # print "visited: ", visit
+                children = problem.getSuccessors(node)
+                print "Children = ", children #testing
+                for child in children:
+                    if child[:][0] not in visit:
+                        print "\nStart For-Loop"
+                        print "Is the child", child[:][0], "a goal? ", problem.isGoalState(child[:][0])
+                        visit += [child[:][0]]
+                        path += [child[:][1]]
+                        print "visit should add", child[:][0]
+                        print "visit =", visit
+                        print "Path = ", path
+                        
+                        childNode = (child[:], visit, action)
+                        print "child[:]", child[:]
+                        print "childNode =", childNode
+                        myList.push(childNode)
+                        print "End For-Loop"
+
+    print "ERROR: PATH NOT FOUND."
+    return []
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
