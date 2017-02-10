@@ -87,24 +87,10 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    print "Start:", problem.getStartState()
-    #print "getStartState returns a ", type(problem.getStartState()) # testing
-    #Output: type "tuple"
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    #print "getSuccessors returns a ", type(problem.getSuccessors(problem.getStartState()))
-    #Output: type "list"
-
     startNode = problem.getStartState()
     myList = util.Stack()
     myList.push((startNode, [], [])) #position, visited, directions
-    testNode = myList.pop() #testing
-    #print "testNode = ", node
-    #print "testNode type is ", type(node)
-    #Output: type "tuple," which is like list except can't change contents
     path = []
-    print "Path = ", path
-    myList.push(testNode)
     # L := List of initial nodes
     # 	(at any time, L is the list of nodes that have not been explored)
     # If L = empty, then FAIL
@@ -116,61 +102,99 @@ def depthFirstSearch(problem):
     #	and for all children x of n,
     #	if x is not in CLOSE,
     #		add x to OPEN and keep path information
-    
-    while not myList.isEmpty():
-        node, visit, action = myList.pop()
-        #print "Path = ", path
-        
-        if problem.isGoalState(node): 
-            path += [action]
-            print "Path Final = ", path
-            return path
-        else: 
-            #testing
-            #pos, direc, value = problem.getSuccessors(node)
-            
-            #print "pos = ", pos
-            #print "direc = ", direc
-            #print "value = ", value
-            
-            print "\nnode =", node
-            print "visit =", visit
-            if node not in visit: #(to prevent redundancies)
-                #position of node, 'cause that's all we care about
-                visit.append(node)
-                print "visit should add", node
-                print "visit =", visit
-                # print "visited: ", visit
-                children = problem.getSuccessors(node)
-                print "Children = ", children #testing
-                for child in children:
-                    if child[:][0] not in visit:
-                        print "\nStart For-Loop"
-                        print "Is the child", child[:][0], "a goal? ", problem.isGoalState(child[:][0])
-                        visit += [child[:][0]]
-                        path += [child[:][1]]
-                        print "visit should add", child[:][0]
-                        print "visit =", visit
-                        print "Path = ", path
-                        
-                        childNode = (child[:], visit, action)
-                        print "child[:]", child[:]
-                        print "childNode =", childNode
-                        myList.push(childNode)
-                        print "End For-Loop"
 
-    print "ERROR: PATH NOT FOUND."
+    #Note: Rewritten from previous version.
+    #I just woke up on Saturday with this epiphany of *exactly* what I was doing wrong
+    #Once I figured it out, it seemed so simple that I wanted to rewrite the code
+    #so as to follow the algorithm given rather than the version I got via messing
+    #around until something worked. It looks so much better this way!
+
+    while not myList.isEmpty(): #If L = empty, then FAIL
+        node, visit, path = myList.pop() # else pick a node n from L.
+        
+        if problem.isGoalState(node): #If n is a goal node, STOP
+            return path #return n and the path to it from an initial node.
+        else: #Otherwise, remove n from OPEN
+            if node not in visit:
+                visit += [node] # put in in CLOSE
+                children = problem.getSuccessors(node)
+                for child in children: #and for all children x of n,
+                    if child[:][0] not in visit: #if x is not in CLOSE,
+                        # add x to OPEN and keep path information
+                        myList.push((child[0], visit, path + [child[:][1]]))
+
+    print "ERROR: PATH NOT FOUND"
     return []
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startNode = problem.getStartState()
+    myList = util.Queue()
+    myList.push((startNode, [], [])) #position, visited, directions
+    # L := List of initial nodes
+    # 	(at any time, L is the list of nodes that have not been explored)
+    # If L = empty, then FAIL
+    # 	else pick a node n from L.
+    # If n is a goal node, STOP
+    #	return n and the path to it from an initial node.
+    # Otherwise, remove n from OPEN
+    #	put in in CLOSE
+    #	and for all children x of n,
+    #	if x is not in CLOSE,
+    #		add x to OPEN and keep path information
+
+    while not myList.isEmpty(): #If L = empty, then FAIL
+        node, visit, path = myList.pop() # else pick a node n from L.
+        
+        if problem.isGoalState(node): #If n is a goal node, STOP
+            return path #return n and the path to it from an initial node.
+        else: #Otherwise, remove n from OPEN
+            if node not in visit:
+                visit += [node] # put in in CLOSE
+                children = problem.getSuccessors(node)
+                for child in children: #and for all children x of n,
+                    if child[:][0] not in visit: #if x is not in CLOSE,
+                        # add x to OPEN and keep path information
+                        myList.push((child[0], visit, path + [child[:][1]]))
+
+    print "ERROR: PATH NOT FOUND"
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    startNode = problem.getStartState()
+    myList = util.PriorityQueue()
+    myList.push((startNode, [], []), 0) #position, visited, directions, cost
+    # L := List of initial nodes
+    # 	(at any time, L is the list of nodes that have not been explored)
+    # If L = empty, then FAIL
+    # 	else pick a node n from L.
+    # If n is a goal node, STOP
+    #	return n and the path to it from an initial node.
+    # Otherwise, remove n from OPEN
+    #	put in in CLOSE
+    #	and for all children x of n,
+    #	if x is not in CLOSE,
+    #		add x to OPEN and keep path information
+
+    while not myList.isEmpty(): #If L = empty, then FAIL
+        node, visit, path = myList.pop() # else pick a node n from L.
+        if problem.isGoalState(node): #If n is a goal node, STOP
+            return path #return n and the path to it from an initial node.
+        else: #Otherwise, remove n from OPEN
+            if node not in visit:
+                visit += [node] # put in in CLOSE
+                children = problem.getSuccessors(node)
+                for child in children: #and for all children x of n,
+                    if child[:][0] not in visit: #if x is not in CLOSE,
+                        # add x to OPEN and keep path information
+                        myList.push((child[0], visit, path + [child[:][1]]), child[:][2])
+
+    print "ERROR: PATH NOT FOUND"
+    return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -182,7 +206,31 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Node: pos, g, h
+    startNode = (problem.getStartState(), 0, 0)
+    myList = util.PriorityQueue()
+    myList.push((startNode, [], []), 0) #position, visited, directions, f
+
+    
+    while not myList.isEmpty(): #If L = empty, then FAIL
+        node, visit, path = myList.pop() # else pick a node n from L.
+        if problem.isGoalState(node[0]): #If n is a goal node, STOP
+
+            return path #return n and the path to it from an initial node.
+        else: #Otherwise, remove n from OPEN
+            if node[0] not in visit:
+                visit += [node[0]] # put in in CLOSE
+                children = problem.getSuccessors(node[0])
+                for child in children: #and for all children x of n,
+                    if child[:][0] not in visit: #if x is not in CLOSE,
+                        # add x to OPEN and keep path information
+                        tempG = node[1] + child[2]
+                        tempH = heuristic(child[0], problem)
+                        tempF = tempG + tempH
+                        myList.push(((child[0], tempG, tempH), visit, path + [child[:][1]]), tempF)
+    
+    print "ERROR: PATH NOT FOUND"
+    return []
 
 
 # Abbreviations
