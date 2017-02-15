@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+import copy
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -288,21 +289,34 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-
+        self.goals = []
+        self.count = 3
+        for i in range(len(self.corners)):
+            self.goals.append(False) #Whether corner has been touched
+        self.start = (self.startingPosition, self.goals, self.count)
+        
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.start
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        #isGoal = self.count < 0
+        isGoal = all(corner == True for corner in state[1])
+        
+        if isGoal:
+            print "Found all goals?:", self.count < 0 # all(corner == True for corner in self.goals)
+            print "goals:", state[1]
+
+        return isGoal
+        
 
     def getSuccessors(self, state):
         """
@@ -325,9 +339,26 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            #I can't think of any particular reason not to just use the
+            #code from PositionSearchProblem(), so I'm going to do so
+            #print "\nState:", state
+            x,y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                nextGoals = copy.deepcopy(state[1]) #Note: Imported copy at top of file
+                nextCount = copy.deepcopy(state[2])
+                if (nextx, nexty) in self.corners:
+                    nextCount -= 1
+                    self.count -= 1
+                    myIndex = self.corners.index((nextx, nexty))
+                    nextGoals[myIndex] = bool((nextx, nexty) in self.corners)
+                successors.append( ( ((nextx, nexty), nextGoals, nextCount), action, 1) )
+                #print "appending:", ( ((nextx, nexty), nextGoals, nextCount), action, 1) 
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
+
 
     def getCostOfActions(self, actions):
         """
