@@ -40,7 +40,7 @@ from game import Actions
 import util
 import time
 import search
-import copy
+import copy #my addition
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -396,13 +396,39 @@ def cornersHeuristic(state, problem):
     #1: S->BR
     #2: S->TL
     #3: S->TR
-    diffS = [abs(xyS[0] - xyBL[0]) + abs(xyS[1] - xyBL[1]), \
+    manhattan = [abs(xyS[0] - xyBL[0]) + abs(xyS[1] - xyBL[1]), \
              abs(xyS[0] - xyBR[0]) + abs(xyS[1] - xyBR[1]), \
              abs(xyS[0] - xyTL[0]) + abs(xyS[1] - xyTL[1]), \
              abs(xyS[0] - xyTR[0]) + abs(xyS[1] - xyTR[1])]
+
+    #Does a Chebyshev distance
+    #0: S->BL
+    #1: S->BR
+    #2: S->TL
+    #3: S->TR
+    cheb = [max(abs(xyS[0] - xyBL[0]), abs(xyS[1] - xyBL[1])), \
+             max(abs(xyS[0] - xyBR[0]), abs(xyS[1] - xyBR[1])), \
+             max(abs(xyS[0] - xyTL[0]), abs(xyS[1] - xyTL[1])), \
+             max(abs(xyS[0] - xyTR[0]), abs(xyS[1] - xyTR[1]))]
+
+    #Does a Euclidean distance
+    #0: S->BL
+    #1: S->BR
+    #2: S->TL
+    #3: S->TR
+    euclid = [((((xyS[0] - xyBL[0]) ** 2) + ((xyS[1] - xyBL[1]) ** 2)) ** 0.5), \
+              ((((xyS[0] - xyBR[0]) ** 2) + ((xyS[1] - xyBR[1]) ** 2)) ** 0.5), \
+              ((((xyS[0] - xyTL[0]) ** 2) + ((xyS[1] - xyTL[1]) ** 2)) ** 0.5), \
+              ((((xyS[0] - xyTR[0]) ** 2) + ((xyS[1] - xyTR[1]) ** 2)) ** 0.5)]
+
+    #Note to self: ** is for exponents. Example: 2 ** 3 = 8
     
 
-    heuristic = min(diffS)
+    mHeuristic = min(manhattan)
+    cHeuristic = min(cheb)
+    eHeuristic = min(euclid)
+
+    heuristic = max(mHeuristic, cHeuristic, eHeuristic)
     
     return heuristic
 

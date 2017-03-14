@@ -193,29 +193,6 @@ def uniformCostSearch(problem):
     print "ERROR: PATH NOT FOUND"
     return []
 
-    """
-    startNode = problem.getStartState()
-    myList = util.PriorityQueue()
-    myList.push((startNode, [], []), 0) #position, visited, directions, cost
-    visit = set()
-
-    while not myList.isEmpty(): #If L = empty, then FAIL
-        node, visit, path = myList.pop() # else pick a node n from L.
-        if problem.isGoalState(node): #If n is a goal node, STOP
-            return path #return n and the path to it from an initial node.
-        else: #Otherwise, remove n from OPEN
-            if node not in visit:
-                visit += [node] # put in in CLOSE
-                children = problem.getSuccessors(node)
-                for child in children: #and for all children x of n,
-                    if child[:][0] not in visit: #if x is not in CLOSE,
-                        # add x to OPEN and keep path information
-                        myList.push((child[0], visit, path + [child[:][1]]), child[:][2])
-
-    print "ERROR: PATH NOT FOUND"
-    return []
-    """
-
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
