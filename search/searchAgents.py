@@ -290,14 +290,9 @@ class CornersProblem(search.SearchProblem):
         # in initializing the problem
         "*** YOUR CODE HERE ***"
         self.goals = []
-        self.count = 3
         for i in range(len(self.corners)):
             self.goals.append(False) #Whether corner has been touched
-        self.start = (self.startingPosition, self.goals, self.count)
-
-        #NOTE FOR UNDO PURPOSES:
-        #CODE WORKS HERE
-        #DO NOT UNDO FURTHER
+        self.start = (self.startingPosition, self.goals)
         
         
     def getStartState(self):
@@ -313,7 +308,6 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        #isGoal = self.count < 0
         isGoal = all(corner == True for corner in state[1])
 
         return isGoal
@@ -341,18 +335,17 @@ class CornersProblem(search.SearchProblem):
 
             "*** YOUR CODE HERE ***"
             x,y = state[0]
+            
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
-            if not self.walls[nextx][nexty]:
+            hitsWall = self.walls[nextx][nexty]
+            if not hitsWall:
                 nextGoals = copy.deepcopy(state[1]) #Note: Imported copy at top of file
-                nextCount = copy.deepcopy(state[2])
                 if (nextx, nexty) in self.corners:
-                    nextCount -= 1
-                    self.count -= 1
                     myIndex = self.corners.index((nextx, nexty))
                     nextGoals[myIndex] = bool((nextx, nexty) in self.corners)
-                successors.append( ( ((nextx, nexty), nextGoals, nextCount), action, 1) )
-                #print "appending:", ( ((nextx, nexty), nextGoals, nextCount), action, 1) 
+                successors.append( ( ((nextx, nexty), nextGoals), action, 1) )
+                #print "appending:", ( ((nextx, nexty), nextGoals), action, 1) 
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
