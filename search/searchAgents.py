@@ -294,6 +294,11 @@ class CornersProblem(search.SearchProblem):
         for i in range(len(self.corners)):
             self.goals.append(False) #Whether corner has been touched
         self.start = (self.startingPosition, self.goals, self.count)
+
+        #NOTE FOR UNDO PURPOSES:
+        #CODE WORKS HERE
+        #DO NOT UNDO FURTHER
+        
         
     def getStartState(self):
         """
@@ -335,9 +340,6 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-            #I can't think of any particular reason not to just use the
-            #code from PositionSearchProblem(), so I'm going to do so
-            #print "\nState:", state
             x,y = state[0]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)

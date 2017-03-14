@@ -137,19 +137,18 @@ def breadthFirstSearch(problem):
     myList.push((startNode, [], [])) #position, visited, directions
     path = []
     visit = set()
-    # L := List of initial nodes
-    # 	(at any time, L is the list of nodes that have not been explored)
-    # If L = empty, then FAIL
-    # 	else pick a node n from L.
-    # If n is a goal node, STOP
-    #	return n and the path to it from an initial node.
-    # Otherwise, remove n from OPEN
-    #	put in in CLOSE
-    #	and for all children x of n,
-    #	if x is not in CLOSE,
-    #		add x to OPEN and keep path information
+
+    #For testing
+    count = 0
+    maxCount = 10
+
+
+    #FOR UNDO PURPOSES: THIS SOLUTION WORKS IN AUTOGRADER.
+    #DO NOT UNDO FURTHER.
+
 
     while not myList.isEmpty(): #If L = empty, then FAIL
+        count += 1
         node, visit, path = myList.pop() # else pick a node n from L.
         
         if problem.isGoalState(node): #If n is a goal node, STOP
@@ -157,11 +156,12 @@ def breadthFirstSearch(problem):
         else: #Otherwise, remove n from OPEN
             if node not in visit:
                 visit += [node] # put in in CLOSE
-                children = problem.getSuccessors(node)
-                for child in children: #and for all children x of n,
-                    if child[0] not in visit: #if x is not in CLOSE,
-                        # add x to OPEN and keep path information
-                        myList.push((child[0], visit, path + [child[1]]))
+            children = problem.getSuccessors(node)
+            for child in children: #and for all children x of n,
+                if child[0] not in visit: #if x is not in CLOSE,
+                    # add x to OPEN and keep path information
+                    visit += [child[0]]
+                    myList.push((child[0], visit, path + [child[1]]))
 
     print "ERROR: PATH NOT FOUND"
     return []
