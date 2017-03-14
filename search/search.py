@@ -131,34 +131,37 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    #"""
     print "\nCODE STARTED"
     startNode = problem.getStartState()
     myList = util.Queue()
-    visit = set()
-    myList.push((startNode, [], [])) #position, visited, directions
+    myList.push((startNode, [])) #position, visited, directions
+    visit = [startNode]
+    
 
     count = 0
     while not myList.isEmpty():# and count < 5: #If L = empty, then FAIL
         count += 1
-        node, visit, path = myList.pop() # else pick a node n from L.
+        #print count
+        node, path = myList.pop() # else pick a node n from L.
         
         if problem.isGoalState(node): #If n is a goal node, STOP
             return path #return n and the path to it from an initial node.
         else: #Otherwise, remove n from OPEN
             if node not in visit:
                 visit += [node] # put in in CLOSE
-                children = problem.getSuccessors(node)
-                #print "\nChildren of", node[0]
-                for child in children: #and for all children x of n,
-                    #print child
-                    if child[:][0] not in visit: #if x is not in CLOSE,
-                        # add x to OPEN and keep path information
-                        myList.push((child[0], visit, path + [child[:][1]]))
+            children = problem.getSuccessors(node)
+            #print "\nChildren of", node[0]
+            for child in children: #and for all children x of n,
+                if child[0] not in visit: #if x is not in CLOSE,
+                    # add x to OPEN and keep path information
+                    visit += [child[0]]
+                    myList.push((child[0], path + [child[:][1]]))
 
     print "ERROR: PATH NOT FOUND"
     return []
 
-    
+    #"""
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
