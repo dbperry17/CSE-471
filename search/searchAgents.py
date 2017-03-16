@@ -289,10 +289,11 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        self.goals = []
+        self.goal = []
         for i in range(len(self.corners)):
-            self.goals.append(False) #Whether corner has been touched
-        self.start = (self.startingPosition, self.goals)
+            self.goal.append(False) #Whether corner has been touched
+        self.start = (self.startingPosition, self.goal)
+        self.testIndex = 0
         
         
     def getStartState(self):
@@ -382,7 +383,7 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-
+    testing = False
     heuristic = 0
     
     xyS = state[0]
@@ -391,44 +392,46 @@ def cornersHeuristic(state, problem):
     xyTL = corners[2]
     xyTR = corners[3]
 
+    #For readability
+    #Difference between current position and each goal for x-value
+    xDiff = [abs(xyS[0] - xyBL[0]), abs(xyS[0] - xyBR[0]), \
+             abs(xyS[0] - xyTL[0]), abs(xyS[0] - xyTR[0])]
+    #Difference between current position and each goal for y-value
+    yDiff = [abs(xyS[1] - xyBL[1]), abs(xyS[1] - xyBR[1]), \
+             abs(xyS[1] - xyTL[1]), abs(xyS[1] - xyTR[1])]
+
+
+    for xRange in range(0, 3): #For each member of xDiff
+        for yRange in range(0, 3): #For each member of yDiff
+            #search yDiff and xDiff in opposite order of their ranges
+            #for a grid pattern that makes sense to me
+            for y in range(yDiff[yRange]): #from 0 to however big the difference is
+                for x in range(xDiff[xRange]): #ditto
+                    print test
+
     #Does a manhattan distance
     #0: S->BL
     #1: S->BR
     #2: S->TL
     #3: S->TR
-    manhattan = [abs(xyS[0] - xyBL[0]) + abs(xyS[1] - xyBL[1]), \
-             abs(xyS[0] - xyBR[0]) + abs(xyS[1] - xyBR[1]), \
-             abs(xyS[0] - xyTL[0]) + abs(xyS[1] - xyTL[1]), \
-             abs(xyS[0] - xyTR[0]) + abs(xyS[1] - xyTR[1])]
+    manhattan = [(xDiff[0] + yDiff[0]), \
+                 (xDiff[1] + yDiff[1]), \
+                 (xDiff[2] + yDiff[2]), \
+                 (xDiff[3] + yDiff[3])]
 
-    #Does a Chebyshev distance
-    #0: S->BL
-    #1: S->BR
-    #2: S->TL
-    #3: S->TR
-    cheb = [max(abs(xyS[0] - xyBL[0]), abs(xyS[1] - xyBL[1])), \
-             max(abs(xyS[0] - xyBR[0]), abs(xyS[1] - xyBR[1])), \
-             max(abs(xyS[0] - xyTL[0]), abs(xyS[1] - xyTL[1])), \
-             max(abs(xyS[0] - xyTR[0]), abs(xyS[1] - xyTR[1]))]
+    manWalls = [xWalls[0] + yWalls[0], \
+                xWalls[1] + yWalls[1], \
+                xWalls[2] + yWalls[2], \
+                xWalls[3] + yWalls[3]]
 
-    #Does a Euclidean distance
-    #0: S->BL
-    #1: S->BR
-    #2: S->TL
-    #3: S->TR
-    euclid = [((((xyS[0] - xyBL[0]) ** 2) + ((xyS[1] - xyBL[1]) ** 2)) ** 0.5), \
-              ((((xyS[0] - xyBR[0]) ** 2) + ((xyS[1] - xyBR[1]) ** 2)) ** 0.5), \
-              ((((xyS[0] - xyTL[0]) ** 2) + ((xyS[1] - xyTL[1]) ** 2)) ** 0.5), \
-              ((((xyS[0] - xyTR[0]) ** 2) + ((xyS[1] - xyTR[1]) ** 2)) ** 0.5)]
+    heuristic = min(manhattan)
 
-    #Note to self: ** is for exponents. Example: 2 ** 3 = 8
     
-
-    mHeuristic = min(manhattan)
-    cHeuristic = min(cheb)
-    eHeuristic = min(euclid)
-
-    heuristic = max(mHeuristic, cHeuristic, eHeuristic)
+    #testing
+    if testing:
+        if problem.testIndex < 1:
+            problem.testIndex += 1
+            print walls[1][1]
     
     return heuristic
 
