@@ -400,15 +400,21 @@ def cornersHeuristic(state, problem):
     yDiff = [abs(xyS[1] - xyBL[1]), abs(xyS[1] - xyBR[1]), \
              abs(xyS[1] - xyTL[1]), abs(xyS[1] - xyTR[1])]
 
-
-    for xRange in range(0, 3): #For each member of xDiff
-        for yRange in range(0, 3): #For each member of yDiff
+    """
+    wallGrid = [0, 0, 0, 0]
+    for xRange in range(0, 4): #For each member of xDiff
+        wallCount = 0
+        for yRange in range(0, 4): #For each member of yDiff
             #search yDiff and xDiff in opposite order of their ranges
             #for a grid pattern that makes sense to me
-            for y in range(yDiff[yRange]): #from 0 to however big the difference is
+            for y in range(yDiff[yRange]): #from 0 to however big the member's difference is
                 for x in range(xDiff[xRange]): #ditto
-                    print test
-
+                    if walls[x][y]: #If there's a wall there
+                        wallCount += 1
+                        
+        wallGrid[xRange] += wallCount
+    """                
+    """
     #Does a manhattan distance
     #0: S->BL
     #1: S->BR
@@ -419,14 +425,302 @@ def cornersHeuristic(state, problem):
                  (xDiff[2] + yDiff[2]), \
                  (xDiff[3] + yDiff[3])]
 
-    manWalls = [xWalls[0] + yWalls[0], \
-                xWalls[1] + yWalls[1], \
-                xWalls[2] + yWalls[2], \
-                xWalls[3] + yWalls[3]]
+    manWalls = [manhattan[0] * (wallGrid[0]/2), \
+                manhattan[1] * (wallGrid[1]/2), \
+                manhattan[2] * (wallGrid[2]/2), \
+                manhattan[3] * (wallGrid[3]/2)]
 
-    heuristic = min(manhattan)
+    heuristic = min(manWalls)
 
+    """
+    heuristic = 0
     
+    xyS = state[0]
+    xyBL = corners[0]
+    xyBR = corners[1]
+    xyTL = corners[2]
+    xyTR = corners[3]
+
+    #Does a manhatten distance
+    #0: S->BL
+    #1: S->BR
+    #2: S->TL
+    #3: S->TR
+    diffS = [abs(xyS[0] - xyBL[0]) + abs(xyS[1] - xyBL[1]), \
+             abs(xyS[0] - xyBR[0]) + abs(xyS[1] - xyBR[1]), \
+             abs(xyS[0] - xyTL[0]) + abs(xyS[1] - xyTL[1]), \
+             abs(xyS[0] - xyTR[0]) + abs(xyS[1] - xyTR[1])]
+    
+    #0: 100000, to make indexing easier to keep track of
+    #1: BL->BR
+    #2: BL->TL
+    #3: BL->TR
+    diffBL = [100000,
+              abs(xyBL[0] - xyBR[0]) + abs(xyBL[1] - xyBR[1]), \
+              abs(xyBL[0] - xyTL[0]) + abs(xyBL[1] - xyTL[1]), \
+              abs(xyBL[0] - xyTR[0]) + abs(xyBL[1] - xyTR[1])]
+    
+    #0: BR->BL
+    #1: 100000
+    #2: BR->TL
+    #3: BR->TR
+    diffBR = [abs(xyBR[0] - xyBL[0]) + abs(xyBR[1] - xyBL[1]), \
+              100000, \
+              abs(xyBR[0] - xyTL[0]) + abs(xyBR[1] - xyTL[1]), \
+              abs(xyBR[0] - xyTR[0]) + abs(xyBR[1] - xyTR[1])] 
+
+    #0: TL->BL
+    #1: TL->BR
+    #2: 100000
+    #3: TL->TR
+    diffTL = [abs(xyTL[0] - xyBL[0]) + abs(xyTL[1] - xyBL[1]), \
+              abs(xyTL[0] - xyBR[0]) + abs(xyTL[1] - xyBR[1]), \
+              100000,
+              abs(xyTL[0] - xyTR[0]) + abs(xyTL[1] - xyTR[1])]
+
+    #0: TR->BL
+    #1: TR->BR
+    #2: TR->TL
+    #3: 100000
+    diffTR = [abs(xyTR[0] - xyBL[0]) + abs(xyTR[1] - xyBL[1]), \
+              abs(xyTR[0] - xyBR[0]) + abs(xyTR[1] - xyBR[1]), \
+              abs(xyTR[0] - xyTL[0]) + abs(xyTR[1] - xyTL[1]), \
+              100000]
+
+    #Makes indexing easier
+    BL = 0
+    BR = 1
+    TL = 2
+    TR = 3
+    """
+    #S->BL
+    if diffS.index(min(diffS)) == BL:
+        #S->BL->BR
+        if diffBL.index(min(diffBL)) == BR:
+            #S->BL->BR->TL->TR
+            if diffBR.index(min(diffBR)) == TL: 
+                heuristic = diffS[BL] + diffBL[BR] + diffBR[TL] + diffTL[TR]
+            #S->BL->BR->TR->TL
+            elif diffBR.index(min(diffBR)) == BR: 
+                heuristic = diffS[BL] + diffBL[BR] + diffBR[TR] + diffTR[TL]
+        #S->BL->TL
+        elif: diffBL.index(min(diffBL)) == TL:
+            #S->BL->TL->BR->TR
+            if diffTL.index(min(diffTL)) == BR: 
+                heuristic = diffS[BL] + diffBL[TL] + diffTL[BR] + diffBR[TR]
+            #S->BL->TL->TR->BR
+            elif diffBR.index(min(diffBR)) == TL: 
+                heuristic = diffS[BL] + diffBL[TL] + diffTL[TR] + diffTR[BR]
+        #S->BL->TR
+        elif: diffBL.index(min(diffBL)) == TR:
+            #S->BL->TR->BR->TL
+            if diffTR.index(min(diffTR)) == BR:
+                heuristic = diffS[0] + diffBL[0] + diffBR[1] + diffTL[2]
+            #S->BL->TR->TL->BR
+            elif diffBR.index(min(diffBR)) == 2:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+    
+    elif diffS.index(min(diffS)) == 1: #S->BR
+        #S->BR->BL
+        if diffBL.index(min(diffBL)) == 0:
+            #S->BR->BL->TL->TR
+            if diffBL.index(min(diffBL)) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+            #S->BR->BL->TR->TL
+            elif diffBL.index(min(diffBL)) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+        #S->BR->TL
+        elif diffBL.index(min(diffBL)) == 0: 
+            #S->BR->TL->BL->TR
+            if diffBL.index(min(diffBL)) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+            #S->BR->TL->TR->BL
+            elif diffBL.index(min(diffBL)) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+        #S->BR->TR
+        elif diffBL.index(min(diffBL)) == 0: 
+            #S->BR->TR->BL->TL
+            if diffBL.index(min(diffBL)) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+            #S->BR->TR->TL->BL
+            elif diffBL.index(min(diffBL) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+
+    elif diffS.index(min(diffS)) == 2: #S->TL
+        #S->TL->BL
+        if diffBL.index(min(diffBL)) == 0: 
+            #S->TL->BL->BR->TR
+            if diffBL.index(min(diffBL)) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+            #S->TL->BL->TR->BR
+            elif diffBL.index(min(diffBL)) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+        #S->TL->BR
+        elif diffBL.index(min(diffBL)) == 0: 
+            #S->TL->BR->BL->TR
+            if diffBL.index(min(diffBL)) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+            #S->TL->BR->TR->BL
+            elif diffBL.index(min(diffBL)) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+        #S->TL->TR
+        elif diffBL.index(min(diffBL)) == 0: 
+            #S->TL->TR->BL->BR
+            if diffBL.index(min(diffBL)) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+            #S->TL->TR->BR->BL
+            elif diffBL.index(min(diffBL)) == 0:
+                heuristic = diffS[0] + diffBL[0] + diffBR[2] + diffTR[2]
+    elif diffS.index(min(diffS)) == 3: #S->TR
+        #S->TR->BL
+        elif diffBL.index(min(diffBL)) == 0: 
+            #S->TR->BL->BR->TL
+            if diffBL.index(min(diffBL)) == 0: 
+            #S->TR->BL->TL->BR
+            elif diffBL.index(min(diffBL)) == 0: 
+        #S->TR->BR
+        elif diffBL.index(min(diffBL)) == 0: 
+            #S->TR->BR->BL->TL
+            if diffBL.index(min(diffBL)) == 0: 
+            #S->TR->BR->TL->BL
+            elif diffBL.index(min(diffBL)) == 0: 
+        #S->TR->TL
+        elif diffBL.index(min(diffBL)) == 0: 
+            #S->TR->TL->BL->BR
+            if diffBL.index(min(diffBL)) == 0: 
+            #S->TR->TL->BR->BL
+            elif diffBL.index(min(diffBL)) == 0: 
+
+    for corner in diffS
+    """
+    """
+
+    #S->BL
+    if diffS.index(min(diffS)) == BL:
+        #S->BL->BR
+        if diffBL.index(min(diffBL)) == BR:
+            #S->BL->BR->TL->TR
+            if diffBR.index(min(diffBR)) == TL:
+                heuristic = min(diffS) + min(diffBL) + min(diffBR) + min(diffTL)             
+            #S->BL->BR->TR->TL
+            elif diffBR.index(min(diffBR)) == BR: 
+                heuristic = min(diffS) + min(diffBL) + min(diffBR) + min(diffTR)
+                
+        #S->BL->TL
+        elif diffBL.index(min(diffBL)) == TL:
+            #S->BL->TL->BR->TR
+            if diffTL.index(min(diffTL)) == BR:
+                heuristic = min(diffS) + min(diffBL) + min(diffTL) + min(diffBR)
+                
+            #S->BL->TL->TR->BR
+            elif diffBR.index(min(diffBR)) == TR:
+                heuristic = min(diffS) + min(diffBL) + min(diffTL) + min(diffTR)
+                
+        #S->BL->TR
+        elif diffBL.index(min(diffBL)) == TR:
+            #S->BL->TR->BR->TL
+            if diffTR.index(min(diffTR)) == BR:
+                heuristic = min(diffS) + min(diffBL) + min(diffTR) + min(diffBR)
+                
+            #S->BL->TR->TL->BR
+            elif diffBR.index(min(diffBR)) == TL:
+                heuristic = min(diffS) + min(diffBL) + min(diffTR) + min(diffTL)
+    
+    elif diffS.index(min(diffS)) == BR: #S->BR
+        #S->BR->BL
+        if diffBR.index(min(diffBR)) == BL:
+            #S->BR->BL->TL->TR
+            if diffBL.index(min(diffBL)) == TL:
+                heuristic = min(diffS) + min(diffBR) + min(diffBL) + min(diffTL)
+                
+            #S->BR->BL->TR->TL
+            elif diffBL.index(min(diffBL)) == TR:
+                heuristic = min(diffS) + min(diffBR) + min(diffBL) + min(diffTR)
+                
+        #S->BR->TL
+        elif diffBR.index(min(diffBR)) == TL:
+            #S->BR->TL->BL->TR
+            if diffTL.index(min(diffTL)) == BL:
+                heuristic = min(diffS) + min(diffBR) + min(diffTL) + min(diffBL)
+                
+            #S->BR->TL->TR->BL
+            elif diffTL.index(min(diffTL)) == TR:
+                heuristic = min(diffS) + min(diffBR) + min(diffTL) + min(diffTR)
+                
+        #S->BR->TR
+        elif diffBR.index(min(diffBR)) == TR: 
+            #S->BR->TR->BL->TL
+            if diffTR.index(min(diffTR)) == BL:
+                heuristic = min(diffS) + min(diffBR) + min(diffTR) + min(diffBL)
+            #S->BR->TR->TL->BL
+            elif diffTR.index(min(diffTR)) == TL:
+                heuristic = min(diffS) + min(diffBR) + min(diffTR) + min(diffTL)
+    elif diffS.index(min(diffS)) == TL: #S->TL
+        #S->TL->BL
+        if diffTL.index(min(diffTL)) == BL: 
+            #S->TL->BL->BR->TR
+            if diffBL.index(min(diffBL)) == BR:
+                heuristic = min(diffS) + min(diffTL) + min(diffBL) + min(diffBR)
+                              
+            #S->TL->BL->TR->BR
+            elif diffBL.index(min(diffBL)) == TR:
+                heuristic = min(diffS) + min(diffTL) + min(diffBL) + min(diffTR)
+                              
+        #S->TL->BR
+        elif diffTL.index(min(diffTL)) == BR: 
+            #S->TL->BR->BL->TR
+            if diffBR.index(min(diffBR)) == BL:
+                heuristic = min(diffS) + min(diffTL) + min(diffBR) + min(diffBL)
+                              
+            #S->TL->BR->TR->BL
+            elif diffBR.index(min(diffBR)) == TR:
+                heuristic = min(diffS) + min(diffTL) + min(diffBR) + min(diffTR)
+                
+                              
+        #S->TL->TR
+        elif diffTL.index(min(diffTL)) == TR: 
+            #S->TL->TR->BL->BR
+            if diffTR.index(min(diffTR)) == BL:
+                heuristic = min(diffS) + min(diffTL) + min(diffTR) + min(diffBL)
+                
+                              
+            #S->TL->TR->BR->BL
+            elif diffTR.index(min(diffTR)) == BR:
+                heuristic = min(diffS) + min(diffTL) + min(diffTR) + min(diffBR)
+                              
+    elif diffS.index(min(diffS)) == TR: #S->TR
+        #S->TR->BL
+        if diffTR.index(min(diffTR)) == BL: 
+            #S->TR->BL->BR->TL
+            if diffBL.index(min(diffBL)) == BR:
+                heuristic = min(diffS) + min(diffTR) + min(diffBL) + min(diffBR)
+            #S->TR->BL->TL->BR
+            elif diffBL.index(min(diffBL)) == TL:
+                heuristic = min(diffS) + min(diffTR) + min(diffBL) + min(diffBL)
+        #S->TR->BR
+        elif diffTR.index(min(diffTR)) == BR: 
+            #S->TR->BR->BL->TL
+            if diffBR.index(min(diffBR)) == BL:
+                heuristic = min(diffS) + min(diffTR) + min(diffBR) + min(diffBL)
+            #S->TR->BR->TL->BL
+            elif diffBR.index(min(diffBR)) == TL:
+                heuristic = min(diffS) + min(diffTR) + min(diffBR) + min(diffTL)
+        #S->TR->TL
+        elif diffTR.index(min(diffTR)) == TL: 
+            #S->TR->TL->BL->BR
+            if diffTL.index(min(diffTL)) == BL:
+                heuristic = min(diffS) + min(diffTR) + min(diffTL) + min(diffBL)
+            #S->TR->TL->BR->BL
+            elif diffTL.index(min(diffTL)) == BR:
+                heuristic = min(diffS) + min(diffTR) + min(diffTL) + min(diffBR)
+    """
+
+    diffTotals = (min(diffS) + min(diffBL) + min(diffBR) + min(diffTL), \
+                  min(diffS) + min(diffBL) + min(diffBR) + min(diffTR), \
+                  min(diffS) + min(diffBL) + min(diffTR) + min(diffTL), \
+                  min(diffS) + min(diffTL) + min(diffBR) + min(diffTL))
+
+    heuristic = max(diffTotals)
     #testing
     if testing:
         if problem.testIndex < 1:
