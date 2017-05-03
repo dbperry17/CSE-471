@@ -69,7 +69,7 @@ initially(9, 9, 7).
 grid(X, Y, Z) :- row(X), col(Y), num(Z), initially(X, Y, Z).
 filled(X, Y) :- row(X), col(Y), num(Z), grid(X, Y, Z).
 
-blank(X, Y) :- row(X), col(Y), not filled(X, Y).
+blank(X, Y) :- row(X), col(Y), not filled(X, Y).
 
 %1 { grid(X, Y, Z) : row(X), col(Y)} 1 :- num(Z).
 
