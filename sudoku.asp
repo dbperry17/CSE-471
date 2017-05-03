@@ -3,18 +3,6 @@ col(1..9).
 box(1..9).
 num(1..9).
 
-box(1) :- row(X), col(Y), X < 4, Y < 4.
-box(2) :- row(X), col(Y), X < 4, Y < 7, Y > 3.
-box(3) :- row(X), col(Y), X < 4, Y > 6.
-
-box(4) :- row(X), col(Y), X > 3, X < 7, Y < 4.
-box(5) :- row(X), col(Y), X > 3, X < 7, Y < 7, Y > 3.
-box(6) :- row(X), col(Y), X > 3, X < 7, Y > 6.
-
-box(7) :- row(X), col(Y), X > 6, Y < 4.
-box(8) :- row(X), col(Y), X > 6, Y < 7, Y > 3.
-box(9) :- row(X), col(Y), X > 6, Y > 6.
-
 %initially(X, Y, Z) = Initially, there is a Z in row X, column Y
 %Row 1
 initially(1, 1, 8).
@@ -71,7 +59,23 @@ filled(X, Y) :- row(X), col(Y), num(Z), grid(X, Y, Z).
 
 blank(X, Y) :- row(X), col(Y), not filled(X, Y).
 
-%1 { grid(X, Y, Z) : row(X), col(Y)} 1 :- num(Z).
+box(1, Z) :- filled(X, Y), num(Z), grid(X, Y, Z), row(X), col(Y), X < 4, Y < 4.
+box(2, Z) :- filled(X, Y), num(Z), grid(X, Y, Z), row(X), col(Y), X < 4, Y < 7, Y > 3.
+box(3, Z) :- filled(X, Y), num(Z), grid(X, Y, Z), row(X), col(Y), X < 4, Y > 6.
 
-#show grid/3.
-#show blank/2.
+box(4, Z) :- filled(X, Y), num(Z), grid(X, Y, Z), row(X), col(Y), X > 3, X < 7, Y < 4.
+box(5, Z) :- filled(X, Y), num(Z), grid(X, Y, Z), row(X), col(Y), X > 3, X < 7, Y < 7, Y > 3.
+box(6, Z) :- filled(X, Y), num(Z), grid(X, Y, Z), row(X), col(Y), X > 3, X < 7, Y > 6.
+
+box(7, Z) :- filled(X, Y), num(Z), grid(X, Y, Z), row(X), col(Y), X > 6, Y < 4.
+box(8, Z) :- filled(X, Y), num(Z), grid(X, Y, Z), row(X), col(Y), X > 6, Y < 7, Y > 3.
+box(9, Z) :- filled(X, Y), num(Z), grid(X, Y, Z), row(X), col(Y), X > 6, Y > 6.
+
+
+%:- row(X), col(Y), num(Z), num(ZZ), grid(X,Y,Z), grid(X,Y,ZZ), Z != ZZ.
+
+%1 { grid(X, Y, Z) : row(X)} 1 :- col(Y), num(Z).
+
+%#show grid/3.
+%#show blank/2.
+#show box/2.
