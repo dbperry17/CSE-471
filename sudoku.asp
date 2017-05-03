@@ -59,23 +59,28 @@ filled(X, Y) :- row(X), col(Y), num(Z), grid(X, Y, Z).
 
 blank(X, Y) :- row(X), col(Y), not filled(X, Y).
 
-box(1, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X < 4, Y < 4.
-box(2, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X < 4, Y < 7, Y > 3.
-box(3, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X < 4, Y > 6.
+%inbox(1, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X < 4, Y < 4.
+%inbox(2, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X < 4, Y < 7, Y > 3.
+%inbox(3, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X < 4, Y > 6.
 
-box(4, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 3, X < 7, Y < 4.
-box(5, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 3, X < 7, Y < 7, Y > 3.
-box(6, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 3, X < 7, Y > 6.
+%inbox(4, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 3, X < 7, Y < 4.
+%inbox(5, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 3, X < 7, Y < 7, Y > 3.
+%inbox(6, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 3, X < 7, Y > 6.
 
-box(7, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 6, Y < 4.
-box(8, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 6, Y < 7, Y > 3.
-box(9, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 6, Y > 6.
+%inbox(7, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 6, Y < 4.
+%inbox(8, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 6, Y < 7, Y > 3.
+%inbox(9, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), X > 6, Y > 6.
+
+%inbox(W, Z) :- num(Z), grid(X, Y, Z), row(X), col(Y), W = ((((((X - 1) / 3) * 9) + ((Y - 1) / 3) + 1)) \ 9) + 1.
 
 
 %:- row(X), col(Y), num(Z), num(ZZ), grid(X,Y,Z), grid(X,Y,ZZ), Z != ZZ.
 
-%1 { grid(X, Y, Z) : row(X)} 1 :- col(Y), num(Z).
+%1 { grid(X, Y, Z) : row(X) } 1 :- col(Y), num(Z).
+%1 { grid(X, Y, Z) : col(Y) } 1 :- row(X), num(Z).
+%1 { inbox(W, Z) : box(W) } 1 :- num(Z).
+%1 { inbox(W, Z) : num(Z) } 1 :- box(W).
 
 %#show grid/3.
 %#show blank/2.
-#show box/2.
+#show inbox/2.
