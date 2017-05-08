@@ -11,6 +11,8 @@
 # Student side autograding was added by Brad Miller, Nick Hay, and
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
+#Comment so I can fucking commit to git. Erase later
+
 
 """
 This file contains all of the agents that can be selected to control Pacman.  To
