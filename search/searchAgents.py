@@ -383,7 +383,6 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
     heuristic = 0
-
     
     xyS = state[0]
     xyBL = corners[0]
@@ -407,45 +406,12 @@ def cornersHeuristic(state, problem):
                util.manhattanDistance(xyS, xyBR), \
                util.manhattanDistance(xyS, xyTR)]
 
-    #None found
-    if state[1] == [False, False, False, False]:
-        heuristic += max(diffAll)
-        
-    #One found
-    if state[1] == [True, False, False, False]: #BL found
-        heuristic += max(diffAll[TL], diffAll[BR], diffAll[TR])
-    elif state[1] == [False, True, False, False]: #TL found
-        heuristic += max(diffAll[BL], diffAll[BR], diffAll[TR])
-    elif state[1] == [False, False, True, False]: #BR found
-        heuristic += max(diffAll[BL], diffAll[TL], diffAll[TR])
-    elif state[1] == [False, False, False, True]: #TR found
-        heuristic += max(diffAll[BL], diffAll[TL], diffAll[BR])
-        
-    #2 found, one is BL
-    if state[1] == [True, True, False, False]: #BL, TL found
-        heuristic += max(diffAll[BR], diffAll[TR])
-    elif state[1] == [True, False, True, False]: #BL, BR found
-        heuristic += max(diffAll[TL], diffAll[TR]) 
-    elif state[1] == [True, False, False, True]: #BL, TR found
-        heuristic += max(diffAll[TL], diffAll[BR])
-    #2 found, one is TL, other is not BL
-    elif state[1] == [False, True, True, False]: #TL, BR found
-        heuristic += max(diffAll[BL], diffAll[TR])
-    elif state[1] == [False, True, False, True]: #TL, TR found
-        heuristic += max(diffAll[BL], diffAll[BR])
-    #TR and BR found
-    elif state[1] == [False, False, True, True]: #TR, BR found
-        heuristic += max(diffAll[BL], diffAll[TL])
-        
-    #3 found
-    if state[1] == [True, True, True, False]: #BL, TL, BR found
-        heuristic += diffAll[TR]
-    elif state[1] == [True, True, False, True]: #BL, TL, TR found
-        heuristic += diffAll[BR]
-    elif state[1] == [True, False, True, True]: #BL, BR, TR found
-        heuristic += diffAll[TL]
-    elif state[1] == [False, True, True, True]: #TL, BR, TR found
-        heuristic += diffAll[BL]
+    distList = []
+    if sum(state[1]) < 4:
+        for index, boolean in enumerate(state[1]):
+            if not boolean:
+                distList.append(diffAll[index])
+        heuristic += max(distList)
     
     return heuristic
 
@@ -542,38 +508,46 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+    
     testing = False
     heuristic = 0
+
+    
     problem.heuristicInfo['foodList'] = foodGrid.asList()
     distList = []
 
+    #Idea: Delete each item in food list as food is found
+
+    
+    i = 0;
+    foundFood = False
+    foodPos = 0;
+
+    for food in problem.heuristicInfo['foodList']:
+        if position == food:
+            foundFood = True
+            foodPos = i
+        i += 1
+        if foundFood:
+            del problem.heuristicInfo['foodList'][i]
 
     for food in problem.heuristicInfo['foodList']:
         distList.append(util.manhattanDistance(position, food))
-
-    #Idea: Delete each item in food list as food is found
-
-    i = 0;
-    foundFood = false
-    foodPos = 0;
-
-    for food in foodGrid:
-        if position == food:
-            foundFood = true
-            foodPos = i
-        i += 1
-
     
 
     if distList:
-        heuristic += min(distList)
+        heuristic += max(distList)
 
     #testing
     if testing:
         if problem.testIndex < 1:
-            problem.testIndex += 1
-            print foodList
+            print "\nfoodList:",
+            print problem.heuristicInfo['foodList']
+            print "distList:",
             print distList
+            print "heuristic:",
+            print heuristic
+    
     
     return heuristic
 
