@@ -384,27 +384,10 @@ def cornersHeuristic(state, problem):
     "*** YOUR CODE HERE ***"
     heuristic = 0
     
-    xyS = state[0]
-    xyBL = corners[0]
-    xyTL = corners[1]
-    xyBR = corners[2]
-    xyTR = corners[3]
-
-    #0: S->BL
-    #1: S->TL
-    #2: S->BR
-    #3: S->TR
-
-    #readability
-    BL = 0
-    TL = 1
-    BR = 2
-    TR = 3
-    
-    diffAll = [util.manhattanDistance(xyS, xyBL), \
-               util.manhattanDistance(xyS, xyTL), \
-               util.manhattanDistance(xyS, xyBR), \
-               util.manhattanDistance(xyS, xyTR)]
+    diffAll = [util.manhattanDistance(state[0], corners[0]), \
+               util.manhattanDistance(state[0], corners[1]), \
+               util.manhattanDistance(state[0], corners[2]), \
+               util.manhattanDistance(state[0], corners[3])]
 
     distList = []
     if sum(state[1]) < 4:
@@ -512,7 +495,6 @@ def foodHeuristic(state, problem):
     testing = False
     heuristic = 0
 
-    
     problem.heuristicInfo['foodList'] = foodGrid.asList()
     distList = []
 
@@ -550,6 +532,7 @@ def foodHeuristic(state, problem):
     
     
     return heuristic
+    
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
