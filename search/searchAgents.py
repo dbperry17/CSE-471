@@ -383,17 +383,16 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
     heuristic = 0
-    
-    diffAll = [util.manhattanDistance(state[0], corners[0]), \
-               util.manhattanDistance(state[0], corners[1]), \
-               util.manhattanDistance(state[0], corners[2]), \
-               util.manhattanDistance(state[0], corners[3])]
 
     distList = []
-    if sum(state[1]) < 4:
-        for index, boolean in enumerate(state[1]):
-            if not boolean:
-                distList.append(diffAll[index])
+
+    i = 0
+    for boolean in state[1]:
+        if not boolean:
+            distList.append(util.manhattanDistance(state[0], corners[i]))
+        i += 1
+            
+    if distList:
         heuristic += max(distList)
     
     return heuristic
@@ -492,9 +491,25 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
     
-    testing = False
     heuristic = 0
 
+    foodList = foodGrid.asList()
+
+    distList = []
+    
+    i = 0
+    for food in foodList:
+        distList.append(util.manhattanDistance(position, foodList[i]))
+        i += 1
+
+    if distList:
+        heuristic += max(distList)    
+    
+    return heuristic
+
+
+
+    """
     problem.heuristicInfo['foodList'] = foodGrid.asList()
     distList = []
 
@@ -522,16 +537,12 @@ def foodHeuristic(state, problem):
 
     #testing
     if testing:
-        if problem.testIndex < 1:
-            print "\nfoodList:",
-            print problem.heuristicInfo['foodList']
-            print "distList:",
-            print distList
-            print "heuristic:",
-            print heuristic
-    
+        print "\nfoodGrid:"
+        print foodGrid
+        print foodGrid[1][1]
     
     return heuristic
+    """
     
 
 class ClosestDotSearchAgent(SearchAgent):
