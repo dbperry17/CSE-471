@@ -489,64 +489,42 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-
-
+    #Idea: Also factor in next food item?
+    #furthest + closest?
+    #furthest + furthest?
+    #closest + furthest? THIS ONE WORKED
+    #closest + closest?
+    
     heuristic = 0
     heuristic1 = 0
     heuristic2 = 0
+    nextFood = (0, 0)
     foodList = foodGrid.asList()
-    nextFood = None
     distList = []
     distList2 = []
 
-    
-    compDist = 9999
-    for food in foodList:
-        distance = util.manhattanDistance(position, food)
-        distList.append(distance)
-        if distance < compDist:
-            compDist = distance
-            nextFood = food
-
-    if distList:
-        heuristic1 = compDist
-    
-    foodList2 = copy.deepcopy(foodList)
-    if nextFood:
-        foodList2.remove(nextFood)
-
-    
-    for food in foodList2:
-        if nextFood:
-            distList2.append(util.manhattanDistance(nextFood, food))
-    
-    if distList2:
-        heuristic2 = max(distList2)
-    
-    
-    heuristic = heuristic1 + heuristic2
-    #heuristic = max(heuristic1, heuristic2)
-    #heuristic = min(heuristic1, heuristic2)
-    
-    return heuristic
-    """
-    #The below explands 9551 nodes on trickySearch
-    #Any experiments with the code should be done above.
-    #Use this only if you give up.
-    
-    heuristic = 0
-
-    distList = []
-    foodList = foodGrid.asList()
-
+    i = 0
+    minDist = 999999
     for food in foodList:
         distList.append(util.manhattanDistance(position, food))
-            
-    if distList:
-        heuristic = max(distList)
+        if distList[i] < minDist: #using this instead of min function to store nextFood
+            minDist = distList[i]
+            nextFood = food
+        i += 1
+
+    if distList: #To prevent heuristic1 from becoming 999999 if no food
+        heuristic1 = minDist 
+    
+    for food in foodList:
+        if nextFood != food:
+            distList2.append(util.manhattanDistance(nextFood, food))
+
+    if distList2: #In case only one dot is left
+        heuristic2 = max(distList2)
+    
+    heuristic = heuristic1 + heuristic2
     
     return heuristic
-    """
 
     
 class ClosestDotSearchAgent(SearchAgent):
