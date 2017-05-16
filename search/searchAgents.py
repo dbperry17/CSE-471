@@ -556,9 +556,32 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        
-        util.raiseNotDefined()
+        #Just reused UCS code
+        startNode = problem.getStartState()
+        myList = util.PriorityQueue()
+        myList.push((startNode, [], [], 0), 0) #(position, visited, directions), cost
+        path = []
+        visit = set()
 
+        while not myList.isEmpty(): #If L = empty, then FAIL
+            node, visit, path, cost = myList.pop() # else pick a node n from L.
+            
+            if problem.isGoalState(node): #If n is a goal node, STOP
+                return path #return n and the path to it from an initial node.
+            else: #Otherwise, remove n from OPEN
+                if node not in visit:
+                    visit += [node] # put in in CLOSE
+                    children = problem.getSuccessors(node)
+                    for child in children: #and for all children x of n,
+                        if child[0] not in visit: #if x is not in CLOSE,
+                            # add x to OPEN and keep path information
+                            myList.update((child[0], visit, path + [child[1]], cost + child[2]), cost + child[2])
+
+        print "ERROR: PATH NOT FOUND"
+        return []
+        
+        
+        
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
     A search problem for finding a path to any food.
@@ -593,7 +616,11 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        isGoal = False
+        if self.food[x][y]:
+            isGoal = True
+
+        return isGoal
 
 def mazeDistance(point1, point2, gameState):
     """
