@@ -345,7 +345,6 @@ class CornersProblem(search.SearchProblem):
                     myIndex = self.corners.index((nextx, nexty))
                     nextGoals[myIndex] = bool((nextx, nexty) in self.corners)
                 successors.append( ( ((nextx, nexty), nextGoals), action, 1) )
-                #print "appending:", ( ((nextx, nexty), nextGoals), action, 1) 
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -393,7 +392,7 @@ def cornersHeuristic(state, problem):
         i += 1
             
     if distList:
-        heuristic += max(distList)
+        heuristic = max(distList)
     
     return heuristic
 
@@ -490,61 +489,66 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+
+
+    heuristic = 0
+    heuristic1 = 0
+    heuristic2 = 0
+    foodList = foodGrid.asList()
+    nextFood = None
+    distList = []
+    distList2 = []
+
+    
+    compDist = 9999
+    for food in foodList:
+        distance = util.manhattanDistance(position, food)
+        distList.append(distance)
+        if distance < compDist:
+            compDist = distance
+            nextFood = food
+
+    if distList:
+        heuristic1 = compDist
+    
+    foodList2 = copy.deepcopy(foodList)
+    if nextFood:
+        foodList2.remove(nextFood)
+
+    
+    for food in foodList2:
+        if nextFood:
+            distList2.append(util.manhattanDistance(nextFood, food))
+    
+    if distList2:
+        heuristic2 = max(distList2)
+    
+    
+    heuristic = heuristic1 + heuristic2
+    #heuristic = max(heuristic1, heuristic2)
+    #heuristic = min(heuristic1, heuristic2)
+    
+    return heuristic
+    """
+    #The below explands 9551 nodes on trickySearch
+    #Any experiments with the code should be done above.
+    #Use this only if you give up.
     
     heuristic = 0
 
+    distList = []
     foodList = foodGrid.asList()
 
-    distList = []
-    
-    i = 0
     for food in foodList:
-        distList.append(util.manhattanDistance(position, foodList[i]))
-        i += 1
-
-    if distList:
-        heuristic += max(distList)    
-    
-    return heuristic
-
-
-
-    """
-    problem.heuristicInfo['foodList'] = foodGrid.asList()
-    distList = []
-
-    #Idea: Delete each item in food list as food is found
-
-    
-    i = 0;
-    foundFood = False
-    foodPos = 0;
-
-    for food in problem.heuristicInfo['foodList']:
-        if position == food:
-            foundFood = True
-            foodPos = i
-        i += 1
-        if foundFood:
-            del problem.heuristicInfo['foodList'][i]
-
-    for food in problem.heuristicInfo['foodList']:
         distList.append(util.manhattanDistance(position, food))
-    
-
+            
     if distList:
-        heuristic += max(distList)
-
-    #testing
-    if testing:
-        print "\nfoodGrid:"
-        print foodGrid
-        print foodGrid[1][1]
+        heuristic = max(distList)
     
     return heuristic
     """
-    
 
+    
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
     def registerInitialState(self, state):
