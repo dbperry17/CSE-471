@@ -148,7 +148,7 @@ class ReflexAgent(Agent):
                             myList.push((child, visit, dfsScore - 0.1))
                             #Subtracting so longer paths get a lower score
 
-        for ghost in newGhostStates: 
+        for ghost in newGhostStates:
             ghostPos = ghost.getPosition()
             if (abs(ghostPos[0] - newPos[0]) < 2) and (abs(ghostPos[1] - newPos[1]) < 2):
                 if ghost.scaredTimer < 10:
