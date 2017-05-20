@@ -128,16 +128,19 @@ class ReflexAgent(Agent):
             statePos = state.getPacmanPosition()
         
             if newFood[statePos[0]][statePos[1]]: #If n is a goal node, STOP
-                score += dfsScore #return n and the path to it from an initial node.
+                score += dfsScore + 10 #return n and the path to it from an initial node.
             else: #Otherwise, remove n from OPEN
                 if state not in visit:
                     visit += [statePos] # put in in CLOSE
                     
-                    for ghost in newGhostPos:
-                        if (abs(ghost[0] - statePos[0]) < 5) and \
-                           (abs(ghost[1] - statePos[1]) < 5):
+                for ghost in newGhostStates:
+                    ghostPos = ghost.getPosition()
+                    if (abs(ghostPos[0] - statePos[0]) < 3) and (abs(ghostPos[1] - statePos[1]) < 3):
+                        if ghost.scaredTimer < 20:
                             score += -0.5
-                    
+                        else:
+                            score += 0.5
+                            
                     directions = state.getLegalActions()
                     children = []
                     for direc in directions:
@@ -154,7 +157,7 @@ class ReflexAgent(Agent):
                 if ghost.scaredTimer < 10:
                     score += -5
                 else:
-                    score += 0.75
+                    score += 1
                 
         ###############################
         # Output to figure things out #
