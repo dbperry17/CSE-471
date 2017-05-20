@@ -119,7 +119,6 @@ def depthFirstSearch(problem):
                     if child[0] not in visit: #if x is not in CLOSE,
                         # add x to OPEN and keep path information
                         myList.push((child[0], visit, path + [child[1]]))
-                        print child[1]
 
     print "ERROR: PATH NOT FOUND"
     return []
