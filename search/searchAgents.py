@@ -489,11 +489,18 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+
     #Idea: Also factor in next food item?
-    #furthest + closest?
-    #furthest + furthest?
-    #closest + furthest? THIS ONE WORKED
-    #closest + closest?
+    """
+    furthest + closest?
+        Not admissible, estimated cost too high
+    furthest + furthest?
+        If estimated cost too high before, this one would also be too high
+    closest + furthest?
+        THIS ONE WORKED!!!
+    closest + closest?
+        Found working one, didn't bother trying
+    """
     
     heuristic = 0
     heuristic1 = 0
