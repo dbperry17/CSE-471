@@ -105,10 +105,6 @@ def depthFirstSearch(problem):
     #		add x to OPEN and keep path information
 
     #Note: Rewritten from previous version.
-    #I just woke up on Saturday with this epiphany of *exactly* what I was doing wrong
-    #Once I figured it out, it seemed so simple that I wanted to rewrite the code
-    #so as to follow the algorithm given rather than the version I got via messing
-    #around until something worked. It looks so much better this way!
 
     while not myList.isEmpty(): #If L = empty, then FAIL
         node, visit, path = myList.pop() # else pick a node n from L.
@@ -123,6 +119,7 @@ def depthFirstSearch(problem):
                     if child[0] not in visit: #if x is not in CLOSE,
                         # add x to OPEN and keep path information
                         myList.push((child[0], visit, path + [child[1]]))
+                        print child[1]
 
     print "ERROR: PATH NOT FOUND"
     return []
