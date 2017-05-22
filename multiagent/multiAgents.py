@@ -19,6 +19,7 @@ import random, util
 from game import Agent
 
 testIndex = 0
+totalPath = []
 
 class ReflexAgent(Agent):
     """
@@ -29,7 +30,6 @@ class ReflexAgent(Agent):
       it in any way you see fit, so long as you don't touch our method
       headers.
     """
-    
 
 
     def getAction(self, gameState):
@@ -50,9 +50,32 @@ class ReflexAgent(Agent):
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
 
-        "Add more of your code here if you want to"
+        "Add more of your code here if you want to"        
+        global totalPath
+        bestIndex = bestIndices.index(chosenIndex)
+        chosenMove = legalMoves[chosenIndex]
+        if len(totalPath) > 1:
+            if (totalPath[-1] == "East" and chosenMove == "West") or \
+               (totalPath[-1] == "West" and chosenMove == "East") or \
+               (totalPath[-1] == "North" and chosenMove == "South") or \
+               (totalPath[-1] == "South" and chosenMove == "North"):
+                if len(bestIndices) > 1:
+                    del bestIndices[bestIndex]
+                    chosenIndex = random.choice(bestIndices)
+                    chosenMove = legalMoves[chosenIndex]
+                else:
+                    maxIndex = scores.index(max(scores))
+                    del scores[maxIndex]
+                    bestScore = max(scores)
+                    bestIndices = [index for index in range(len(scores)) \
+                                   if scores[index] == bestScore]
+                    chosenIndex = random.choice(bestIndices)
+                    chosenMove = legalMoves[chosenIndex]       
+        
+        
+        totalPath.append(chosenMove)
 
-        return legalMoves[chosenIndex]
+        return chosenMove
 
     def evaluationFunction(self, currentGameState, action):
         """
@@ -77,6 +100,109 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
+        """        
+        #Testing stuff
+        global testIndex
+        if testIndex == 0:
+            f = open('result.txt','w')
+        else:
+            f = open('result.txt','a')
+        if testIndex != 0:
+            print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        print >>f, "Iteration:", testIndex
+        testIndex += 1
+        """
+
+        #Data for current state:
+        curPos = currentGameState.getPacmanPosition()
+        curFood = currentGameState.getFood()
+        curGhostStates = currentGameState.getGhostStates()
+        curScaredTimes = [ghostState.scaredTimer for ghostState in curGhostStates]
+
+        #Other stuff to get
+        score = successorGameState.getScore()
+        newGhostPos = successorGameState.getGhostPositions()
+
+        ############################
+        # Below is actual analysis #
+        ############################
+
+        #Very slightly prefer capsules
+        if newScaredTimes > curScaredTimes:
+            score += 0.1       
+        
+        #If no food found, search for a path to food
+        #Code adjusted from DFS in Project 1, Problem 1
+        #Note to self: Can't use priority queues, as they search for least
+        #amounts. We want a high score.
+        if not curFood[newPos[0]][newPos[1]]:
+            myList = util.Stack()
+            myList.push((successorGameState, [], [], 0)) #position, visited, path, score
+            dfsScore = 0
+            path = []
+            visit = set()
+
+            while not myList.isEmpty():
+                state, visit, path, tempScore = myList.pop()
+            dfsScore += tempScore
+
+            statePos = state.getPacmanPosition()            
+        
+            if newFood[statePos[0]][statePos[1]]:
+                score += dfsScore                
+            else:
+                if state not in visit:
+                    visit += [statePos]
+
+                #Stay away from paths close to ghosts
+                for ghost in state.getGhostStates():
+                    ghostPos = ghost.getPosition()
+                    if ((abs(ghostPos[0] - newPos[0]) < 3) and (abs(ghostPos[1] - newPos[1]) < 2)) \
+                        or ((abs(ghostPos[0] - newPos[0]) < 2) and (abs(ghostPos[1] - newPos[1]) < 3)):
+                        if ghost.scaredTimer < 20:
+                            score += -0.5
+                        else:
+                            score += 0.5
+                            
+                    directions = state.getLegalActions()
+                    children = []
+                    for direc in directions:
+                        children.append((state.generatePacmanSuccessor(direc), direc))
+                    for child in children:
+                        if child[0].getPacmanPosition() not in visit:
+                            myList.push((child[0], visit, path + [child[1]], dfsScore - 0.1))
+                            #Subtracting so longer paths get a lower score
+
+        for ghost in newGhostStates:
+            ghostPos = ghost.getPosition()
+            if ((abs(ghostPos[0] - newPos[0]) < 1) and (abs(ghostPos[1] - newPos[1]) < 2)) \
+                or ((abs(ghostPos[0] - newPos[0]) < 2) and (abs(ghostPos[1] - newPos[1]) < 1)):
+                if ghost.scaredTimer < 10:
+                    score += -11
+                else:
+                    score += 1
+
+        
+        """        
+        ###############################
+        # Output to figure things out #
+        ###############################
+        print >>f,"successorGameState:\n", successorGameState
+        print >>f,"Score for this move:", score
+        print >>f,"curPos:", curPos
+        print >>f,"newPos:", newPos
+        print >>f,"action:", action
+        print >>f,"newFood:\n", newFood
+        print >>f,"newGhostStates:", newGhostStates
+        print >>f,"newScaredTimes:", newScaredTimes
+        """
+        
+        return score
+
+        #Note: The code below gets 10/10 victories
+        #with an average score of 631.4
+        #This give 3/4 points. Uncomment only if you give up.
+        """
         #Testing stuff
         global testIndex
         if testIndex == 0:
@@ -104,38 +230,32 @@ class ReflexAgent(Agent):
 
         #Very slightly prefer capsules
         if newScaredTimes > curScaredTimes:
-            score += 0.1
-
-        curFoodAmount = 0
-        for row in curFood:
-            curFoodAmount += sum(row) 
-        newFoodAmount = 0
-        for row in newFood:
-            newFoodAmount += sum(row)         
+            score += 0.1         
         
         #If no food found, search for a path to food
         #Code adjusted from DFS in Project 1, Problem 1
         #Note to self: Can't use priority queues, as they search for least
         #amounts. We want a high score.
-        if newFoodAmount == curFoodAmount:
+        if not curFood[newPos[0]][newPos[1]]:
             myList = util.Stack()
             myList.push((successorGameState, [], 0)) #position, visited, score
             dfsScore = 0
             visit = set()
 
-            while not myList.isEmpty(): #If L = empty, then FAIL
-                state, visit, tempScore = myList.pop() # else pick a state n from L.
+            while not myList.isEmpty():
+                state, visit, tempScore = myList.pop()
             dfsScore += tempScore
 
             statePos = state.getPacmanPosition()
         
-            if newFood[statePos[0]][statePos[1]]: #If n is a goal node, STOP
-                score += dfsScore #return n and the path to it from an initial node.
-            else: #Otherwise, remove n from OPEN
+            if newFood[statePos[0]][statePos[1]]:
+                score += dfsScore
+            else:
                 if state not in visit:
-                    visit += [statePos] # put in in CLOSE
-                    
-                for ghost in newGhostStates:
+                    visit += [statePos]
+
+                #Stay away from paths close to ghosts
+                for ghost in state.getGhostStates():
                     ghostPos = ghost.getPosition()
                     if ((abs(ghostPos[0] - newPos[0]) < 3) and (abs(ghostPos[1] - newPos[1]) < 2)) \
                         or ((abs(ghostPos[0] - newPos[0]) < 2) and (abs(ghostPos[1] - newPos[1]) < 3)):
@@ -148,113 +268,8 @@ class ReflexAgent(Agent):
                     children = []
                     for direc in directions:
                         children.append(state.generatePacmanSuccessor(direc))
-                    for child in children: #and for all children x of n,
-                        if child.getPacmanPosition() not in visit: #if x is not in CLOSE,
-                            # add x to OPEN and keep path information
-                            myList.push((child, visit, dfsScore - 0.1))
-                            #Subtracting so longer paths get a lower score
-
-        for ghost in newGhostStates:
-            ghostPos = ghost.getPosition()
-            if ((abs(ghostPos[0] - newPos[0]) < 1) and (abs(ghostPos[1] - newPos[1]) < 2)) \
-                or ((abs(ghostPos[0] - newPos[0]) < 2) and (abs(ghostPos[1] - newPos[1]) < 1)):
-                if ghost.scaredTimer < 10:
-                    score += -11
-                else:
-                    score += 1
-                
-        ###############################
-        # Output to figure things out #
-        ###############################
-        print >>f,"successorGameState:\n", successorGameState
-        print >>f,"Score for this move:", score
-        print >>f,"curPos:", curPos
-        print >>f,"newPos:", newPos
-        print >>f,"action:", action
-        print >>f,"newFood:\n", newFood
-        print >>f,"newGhostStates:", newGhostStates
-        print >>f,"newScaredTimes:", newScaredTimes
-        
-        return score
-
-        #Note: The code below gets 10/10 victories
-        #with an average score of 631.4
-        #This give 3/4 points. Uncomment only if you give up.
-        """
-                #Testing stuff
-        global testIndex
-        if testIndex == 0:
-            f = open('result.txt','w')
-        else:
-            f = open('result.txt','a')
-        if testIndex != 0:
-            print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-        print >>f, "Iteration:", testIndex
-        testIndex += 1
-
-        #Data for current state:
-        curPos = currentGameState.getPacmanPosition()
-        curFood = currentGameState.getFood()
-        curGhostStates = currentGameState.getGhostStates()
-        curScaredTimes = [ghostState.scaredTimer for ghostState in curGhostStates]
-
-        #Other stuff to get
-        score = successorGameState.getScore()
-        newGhostPos = successorGameState.getGhostPositions()
-
-        ############################
-        # Below is actual analysis #
-        ############################
-
-        #Very slightly prefer capsules
-        if newScaredTimes > curScaredTimes:
-            score += 0.1
-
-        curFoodAmount = 0
-        for row in curFood:
-            curFoodAmount += sum(row) 
-        newFoodAmount = 0
-        for row in newFood:
-            newFoodAmount += sum(row)         
-        
-        #If no food found, search for a path to food
-        #Code adjusted from DFS in Project 1, Problem 1
-        #Note to self: Can't use priority queues, as they search for least
-        #amounts. We want a high score.
-        if newFoodAmount == curFoodAmount:
-            myList = util.Stack()
-            myList.push((successorGameState, [], 0)) #position, visited, score
-            dfsScore = 0
-            visit = set()
-
-            while not myList.isEmpty(): #If L = empty, then FAIL
-                state, visit, tempScore = myList.pop() # else pick a state n from L.
-            dfsScore += tempScore
-
-            statePos = state.getPacmanPosition()
-        
-            if newFood[statePos[0]][statePos[1]]: #If n is a goal node, STOP
-                score += dfsScore #return n and the path to it from an initial node.
-            else: #Otherwise, remove n from OPEN
-                if state not in visit:
-                    visit += [statePos] # put in in CLOSE
-                    
-                for ghost in newGhostStates:
-                    ghostPos = ghost.getPosition()
-                    if ((abs(ghostPos[0] - newPos[0]) < 3) and (abs(ghostPos[1] - newPos[1]) < 2)) \
-                        or ((abs(ghostPos[0] - newPos[0]) < 2) and (abs(ghostPos[1] - newPos[1]) < 3)):
-                        if ghost.scaredTimer < 20:
-                            score += -0.5
-                        else:
-                            score += 0.5
-                            
-                    directions = state.getLegalActions()
-                    children = []
-                    for direc in directions:
-                        children.append(state.generatePacmanSuccessor(direc))
-                    for child in children: #and for all children x of n,
-                        if child.getPacmanPosition() not in visit: #if x is not in CLOSE,
-                            # add x to OPEN and keep path information
+                    for child in children:
+                        if child.getPacmanPosition() not in visit:
                             myList.push((child, visit, dfsScore - 0.1))
                             #Subtracting so longer paths get a lower score
 
