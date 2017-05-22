@@ -68,7 +68,7 @@ class ReflexAgent(Agent):
 
         Print out these variables to see what you're getting, then combine them
         to create a masterful evaluation function.
-        """
+        """        
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
@@ -104,7 +104,7 @@ class ReflexAgent(Agent):
 
         #Very slightly prefer capsules
         if newScaredTimes > curScaredTimes:
-            score += 0.01
+            score += 0.1
 
         curFoodAmount = 0
         for row in curFood:
@@ -115,6 +115,8 @@ class ReflexAgent(Agent):
         
         #If no food found, search for a path to food
         #Code adjusted from DFS in Project 1, Problem 1
+        #Note to self: Can't use priority queues, as they search for least
+        #amounts. We want a high score.
         if newFoodAmount == curFoodAmount:
             myList = util.Stack()
             myList.push((successorGameState, [], 0)) #position, visited, score
@@ -135,7 +137,8 @@ class ReflexAgent(Agent):
                     
                 for ghost in newGhostStates:
                     ghostPos = ghost.getPosition()
-                    if (abs(ghostPos[0] - statePos[0]) < 3) and (abs(ghostPos[1] - statePos[1]) < 3):
+                    if ((abs(ghostPos[0] - newPos[0]) < 3) and (abs(ghostPos[1] - newPos[1]) < 2)) \
+                        or ((abs(ghostPos[0] - newPos[0]) < 2) and (abs(ghostPos[1] - newPos[1]) < 3)):
                         if ghost.scaredTimer < 20:
                             score += -0.5
                         else:
@@ -153,7 +156,8 @@ class ReflexAgent(Agent):
 
         for ghost in newGhostStates:
             ghostPos = ghost.getPosition()
-            if (abs(ghostPos[0] - newPos[0]) < 2) and (abs(ghostPos[1] - newPos[1]) < 2):
+            if ((abs(ghostPos[0] - newPos[0]) < 1) and (abs(ghostPos[1] - newPos[1]) < 2)) \
+                or ((abs(ghostPos[0] - newPos[0]) < 2) and (abs(ghostPos[1] - newPos[1]) < 1)):
                 if ghost.scaredTimer < 10:
                     score += -11
                 else:
@@ -172,6 +176,111 @@ class ReflexAgent(Agent):
         print >>f,"newScaredTimes:", newScaredTimes
         
         return score
+
+        #Note: The code below gets 10/10 victories
+        #with an average score of 631.4
+        #This give 3/4 points. Uncomment only if you give up.
+        """
+                #Testing stuff
+        global testIndex
+        if testIndex == 0:
+            f = open('result.txt','w')
+        else:
+            f = open('result.txt','a')
+        if testIndex != 0:
+            print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        print >>f, "Iteration:", testIndex
+        testIndex += 1
+
+        #Data for current state:
+        curPos = currentGameState.getPacmanPosition()
+        curFood = currentGameState.getFood()
+        curGhostStates = currentGameState.getGhostStates()
+        curScaredTimes = [ghostState.scaredTimer for ghostState in curGhostStates]
+
+        #Other stuff to get
+        score = successorGameState.getScore()
+        newGhostPos = successorGameState.getGhostPositions()
+
+        ############################
+        # Below is actual analysis #
+        ############################
+
+        #Very slightly prefer capsules
+        if newScaredTimes > curScaredTimes:
+            score += 0.1
+
+        curFoodAmount = 0
+        for row in curFood:
+            curFoodAmount += sum(row) 
+        newFoodAmount = 0
+        for row in newFood:
+            newFoodAmount += sum(row)         
+        
+        #If no food found, search for a path to food
+        #Code adjusted from DFS in Project 1, Problem 1
+        #Note to self: Can't use priority queues, as they search for least
+        #amounts. We want a high score.
+        if newFoodAmount == curFoodAmount:
+            myList = util.Stack()
+            myList.push((successorGameState, [], 0)) #position, visited, score
+            dfsScore = 0
+            visit = set()
+
+            while not myList.isEmpty(): #If L = empty, then FAIL
+                state, visit, tempScore = myList.pop() # else pick a state n from L.
+            dfsScore += tempScore
+
+            statePos = state.getPacmanPosition()
+        
+            if newFood[statePos[0]][statePos[1]]: #If n is a goal node, STOP
+                score += dfsScore #return n and the path to it from an initial node.
+            else: #Otherwise, remove n from OPEN
+                if state not in visit:
+                    visit += [statePos] # put in in CLOSE
+                    
+                for ghost in newGhostStates:
+                    ghostPos = ghost.getPosition()
+                    if ((abs(ghostPos[0] - newPos[0]) < 3) and (abs(ghostPos[1] - newPos[1]) < 2)) \
+                        or ((abs(ghostPos[0] - newPos[0]) < 2) and (abs(ghostPos[1] - newPos[1]) < 3)):
+                        if ghost.scaredTimer < 20:
+                            score += -0.5
+                        else:
+                            score += 0.5
+                            
+                    directions = state.getLegalActions()
+                    children = []
+                    for direc in directions:
+                        children.append(state.generatePacmanSuccessor(direc))
+                    for child in children: #and for all children x of n,
+                        if child.getPacmanPosition() not in visit: #if x is not in CLOSE,
+                            # add x to OPEN and keep path information
+                            myList.push((child, visit, dfsScore - 0.1))
+                            #Subtracting so longer paths get a lower score
+
+        for ghost in newGhostStates:
+            ghostPos = ghost.getPosition()
+            if ((abs(ghostPos[0] - newPos[0]) < 1) and (abs(ghostPos[1] - newPos[1]) < 2)) \
+                or ((abs(ghostPos[0] - newPos[0]) < 2) and (abs(ghostPos[1] - newPos[1]) < 1)):
+                if ghost.scaredTimer < 10:
+                    score += -11
+                else:
+                    score += 1
+                
+        ###############################
+        # Output to figure things out #
+        ###############################
+        print >>f,"successorGameState:\n", successorGameState
+        print >>f,"Score for this move:", score
+        print >>f,"curPos:", curPos
+        print >>f,"newPos:", newPos
+        print >>f,"action:", action
+        print >>f,"newFood:\n", newFood
+        print >>f,"newGhostStates:", newGhostStates
+        print >>f,"newScaredTimes:", newScaredTimes
+        
+        return score
+        """
 
 def scoreEvaluationFunction(currentGameState):
     """
