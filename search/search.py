@@ -168,7 +168,8 @@ def uniformCostSearch(problem):
     print "\nCODE STARTED"
     startNode = problem.getStartState()
     myList = util.PriorityQueue()
-    myList.push((startNode, [], [], 0), 0) #(position, visited, directions), cost
+    myList.push((startNode, [], [], 0), 0)
+    #(position, visited, directions, cost for popping purposes), cost
     path = []
     visit = set()
 
