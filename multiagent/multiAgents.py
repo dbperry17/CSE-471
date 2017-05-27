@@ -5,7 +5,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -20,6 +20,7 @@ import random, util
 from game import Agent
 
 testIndex = 0
+maxTest = 20
 totalPath = []
 
 class ReflexAgent(Agent):
@@ -55,7 +56,7 @@ class ReflexAgent(Agent):
         #Code to prevent Pacman from going back and forth across the same
         #two spots over and over again
         chosenMove = legalMoves[chosenIndex]
-        
+
         global totalPath
 
         if len(totalPath) > 1:
@@ -80,10 +81,10 @@ class ReflexAgent(Agent):
                                    if scores[index] == bestScore]
                     chosenIndex = random.choice(bestIndices)
                     chosenMove = legalMoves[chosenIndex]
-        
-        
+
+
         totalPath.append(chosenMove)
-        
+
         return chosenMove
 
     def evaluationFunction(self, currentGameState, action):
@@ -100,7 +101,7 @@ class ReflexAgent(Agent):
 
         Print out these variables to see what you're getting, then combine them
         to create a masterful evaluation function.
-        """        
+        """
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         newPos = successorGameState.getPacmanPosition()
@@ -125,7 +126,7 @@ class ReflexAgent(Agent):
         #Note: Seems to run a bit slowly when far from food.
         #Might be because I have fifty billion things open, though
 
-        
+
         #Data for current state:
         curPos = currentGameState.getPacmanPosition()
         curFood = currentGameState.getFood()
@@ -142,8 +143,8 @@ class ReflexAgent(Agent):
 
         #Very slightly prefer capsules
         if newScaredTimes > curScaredTimes:
-            score += 0.1       
-        
+            score += 0.1
+
         #If no food found, search for a path to food
         #Code adjusted from UCS in Project 1, Problem 3
         if not curFood[newPos[0]][newPos[1]]:
@@ -160,7 +161,7 @@ class ReflexAgent(Agent):
                 state, visit, ucsScore = myList.pop()
 
                 statePos = state.getPacmanPosition()
-                
+
                 if curFood[statePos[0]][statePos[1]]:
                     score = ucsScore + 10
                     break
@@ -176,7 +177,7 @@ class ReflexAgent(Agent):
                                     ucsScore += -0.5
                                 else:
                                     ucsScore += 0.5
-                        
+
                         directions = state.getLegalActions()
                         children = []
                         for direc in directions:
@@ -186,7 +187,7 @@ class ReflexAgent(Agent):
                                 myList.push((child, visit, ucsScore - 0.01), -(ucsScore - 0.01))
                                 #Since PriorityQueue works with lowest cost and I want highest
                                 #score, use negative score as cost to get highest score
-                                
+
         for ghost in newGhostStates:
             ghostPos = ghost.getPosition()
             if ((abs(ghostPos[0] - newPos[0]) < 1) and (abs(ghostPos[1] - newPos[1]) < 2)) \
@@ -195,7 +196,7 @@ class ReflexAgent(Agent):
                     score += -11
                 else:
                     score += 1
-        
+
         return score
 
 def scoreEvaluationFunction(currentGameState):
@@ -252,7 +253,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
         return self.minimax_decision(gameState, self.depth)
-        
+
     #Code below adjusted from
     #   https://github.com/aimacode/aima-python/blob/master/games.py
     #Which was linked to on the website
@@ -260,17 +261,31 @@ class MinimaxAgent(MultiAgentSearchAgent):
     #Which was mentioned on page viii (in the preface) of
     #   Artificial Intelligence: A Modern Approach (Third Edition)
     #   by Stuart J. Russell and Peter Norvig
-    
+
     #(I am assuming that I am allowed to use it since it is, essentially,
     # from the book. In fact, it is simply a python version of the algorithm
     # in figure 5.3 in the book.)
-    
+
     def minimax_decision(self, gameState, maxDepth):
         # Body of minimax_decision:
+
+        #########################################
+        # Setup for output to figure things out #
+        #########################################
+        global testIndex
+        if testIndex == 0:
+            f = open('result.txt','w')
+        else:
+            f = open('result.txt','a')
+        if testIndex != 0:
+            print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        print >>f, "Iteration:", (testIndex)
+        #########################################
+
         curDepth = 0
         ghostAmount = gameState.getNumAgents()
         pacmanMoves = gameState.getLegalActions(0)
-        
+
         allGhostMins = []
         for pacmanAction in pacmanMoves:
             nextState = gameState.generateSuccessor(0,pacmanAction)
@@ -281,28 +296,80 @@ class MinimaxAgent(MultiAgentSearchAgent):
                     ghostMins.append((pacmanAction, self.min_value(nextState.generateSuccessor(ghost,ghostAction), ghost, curDepth, maxDepth)))
                 if ghostMins:
                     allGhostMins.append(max(ghostMins, key=lambda a: a[1]))
-            
+
         bestMove = "Stop"
         if allGhostMins:
             bestMove = max(allGhostMins, key=lambda a: a[1])[0]
 
+        ##################################
+        # Output to figure things out in #
+        #       minimax_decision()       #
+        ##################################
+        print >>f,"curDepth:", curDepth
+        print >>f,"maxDepth:", maxDepth
+        ##################################
+
         return bestMove
 
     def max_value(self, gameState, agent, curDepth, maxDepth):
-        if gameState.isWin() or curDepth == maxDepth:
-            return self.evaluationFunction
+        global testIndex
+        testIndex += 1
+
+        done = False
+
+        if gameState.isWin() or testIndex >= maxTest: #or curDepth == maxDepth:
+            returnValue = self.evaluationFunction
+            done = True
         v = -9999999
-        for action in gameState.getLegalActions(agent):
-            v = max(v, self.min_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth))
-        return v
+        if not done:
+            for action in gameState.getLegalActions(agent):
+                v = max(v, self.min_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth))
+            returnValue = v
+
+
+        ##################################
+        # Output to figure things out in #
+        #           max_value()          #
+        ##################################
+        f = open('result.txt','a')
+        print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        print >>f, "Iteration:", (testIndex)
+
+
+        print >>f,"curDepth:", curDepth
+        print >>f,"maxDepth:", maxDepth
+        ##################################
+
+        return returnValue
 
     def min_value(self, gameState, agent, curDepth, maxDepth):
-        if gameState.isLose() or curDepth == maxDepth:
-            return self.evaluationFunction
+        global testIndex
+        testIndex += 1
+
+        done = False
+
+        if gameState.isLose() or testIndex >= maxTest: #or curDepth == maxDepth:
+            returnValue = self.evaluationFunction
+            done = True
         v = 9999999
-        for action in gameState.getLegalActions(0):
-            v = min(v, self.max_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth))
-        return v
+        if not done:
+            for action in gameState.getLegalActions(0):
+                v = min(v, self.max_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth))
+            returnValue = v
+
+        ##################################
+        # Output to figure things out in #
+        #           min_value()          #
+        ##################################
+        f = open('result.txt','a')
+        print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        print >>f, "Iteration:", (testIndex)
+
+
+        print >>f,"curDepth:", curDepth
+        ##################################
+
+        return returnValue
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
