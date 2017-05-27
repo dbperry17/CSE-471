@@ -113,7 +113,7 @@ class ReflexAgent(Agent):
         #       autograder from IDLE. I am setting this function as "not
         #       defined" so that it skips testing for question 1.
         #       REMEMBER TO COMMENT OUT THE NEXT LINE WHEN DONE
-        #util.raiseNotDefined()
+        util.raiseNotDefined()
 
 
 
@@ -279,17 +279,18 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 ghostMins = []
                 for ghostAction in ghostMoves:
                     ghostMins.append((pacmanAction, self.min_value(nextState.generateSuccessor(ghost,ghostAction), ghost, curDepth, maxDepth)))
-                allGhostMins.append(max(ghostMins, key=lambda a: a[1]))
+                if ghostMins:
+                    allGhostMins.append(max(ghostMins, key=lambda a: a[1]))
             
         bestMove = "Stop"
         if allGhostMins:
-            bestMove = max(ghostMins, key=lambda a: a[1])[0]
+            bestMove = max(allGhostMins, key=lambda a: a[1])[0]
 
         return bestMove
 
     def max_value(self, gameState, agent, curDepth, maxDepth):
         if gameState.isWin() or curDepth == maxDepth:
-            return gameState.getScore()
+            return self.evaluationFunction
         v = -9999999
         for action in gameState.getLegalActions(agent):
             v = max(v, self.min_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth))
@@ -297,9 +298,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def min_value(self, gameState, agent, curDepth, maxDepth):
         if gameState.isLose() or curDepth == maxDepth:
-            return gameState.getScore()
+            return self.evaluationFunction
         v = 9999999
-        for action in gameState.getLegalActions(agent):
+        for action in gameState.getLegalActions(0):
             v = min(v, self.max_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth))
         return v
 
