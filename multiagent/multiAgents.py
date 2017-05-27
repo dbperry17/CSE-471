@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # multiAgents.py
 # --------------
 # Licensing Information:  You are free to use or extend these projects for
@@ -108,6 +109,15 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
+        #Note:  Console doesn't scroll up far enough for question 2, so running
+        #       autograder from IDLE. I am setting this function as "not
+        #       defined" so that it skips testing for question 1.
+        #       REMEMBER TO COMMENT OUT THE NEXT LINE WHEN DONE
+        #util.raiseNotDefined()
+
+
+
+
         #Stats for code below:
         #Wins:          10/10
         #Average Score: 1293.5
@@ -135,12 +145,11 @@ class ReflexAgent(Agent):
             score += 0.1       
         
         #If no food found, search for a path to food
-        #Code adjusted from DFS in Project 1, Problem 1
+        #Code adjusted from UCS in Project 1, Problem 3
         if not curFood[newPos[0]][newPos[1]]:
-            ######################
-            #         UCS        #
-            # NOT DONE ADJUSTING #
-            ######################
+            #######
+            # UCS #
+            #######
             myList = util.PriorityQueue()
             myList.push((successorGameState, [], score), 0)
             #(position, visited, score), cost
@@ -149,7 +158,6 @@ class ReflexAgent(Agent):
 
             while not myList.isEmpty():
                 state, visit, ucsScore = myList.pop()
-                #
 
                 statePos = state.getPacmanPosition()
                 
@@ -187,33 +195,6 @@ class ReflexAgent(Agent):
                     score += -11
                 else:
                     score += 1
-
-        
-        """        
-        ###############################
-        # Output to figure things out #
-        ###############################
-        #Testing stuff
-        global testIndex
-        if testIndex == 0:
-            f = open('result.txt','w')
-        else:
-            f = open('result.txt','a')
-        if testIndex != 0:
-            print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-        print >>f, "Iteration:", testIndex
-        #print "Iteration:", testIndex
-        testIndex += 1
-        
-        print >>f,"successorGameState:\n", successorGameState
-        print >>f,"Score for this move:", score
-        print >>f,"curPos:", curPos
-        print >>f,"newPos:", newPos
-        print >>f,"action:", action
-        #print >>f,"newFood:\n", newFood
-        print >>f,"newGhostStates:", newGhostStates
-        print >>f,"newScaredTimes:", newScaredTimes
-        """
         
         return score
 
@@ -270,7 +251,58 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.minimax_decision(gameState, self.depth)
+        
+    #Code below adjusted from
+    #   https://github.com/aimacode/aima-python/blob/master/games.py
+    #Which was linked to on the website
+    #   http://aima.cs.berkeley.edu/
+    #Which was mentioned on page viii (in the preface) of
+    #   Artificial Intelligence: A Modern Approach (Third Edition)
+    #   by Stuart J. Russell and Peter Norvig
+    
+    #(I am assuming that I am allowed to use it since it is, essentially,
+    # from the book. In fact, it is simply a python version of the algorithm
+    # in figure 5.3 in the book.)
+    
+    def minimax_decision(self, gameState, maxDepth):
+        # Body of minimax_decision:
+        curDepth = 0
+        ghostAmount = gameState.getNumAgents()
+        pacmanMoves = gameState.getLegalActions(0)
+        
+        allGhostMins = []
+        for pacmanAction in pacmanMoves:
+            nextState = gameState.generateSuccessor(0,pacmanAction)
+            for ghost in range(1, (ghostAmount - 1)):
+                ghostMoves = nextState.getLegalActions(ghost)
+                ghostMins = []
+                for ghostAction in ghostMoves:
+                    ghostMins.append((pacmanAction, self.min_value(nextState.generateSuccessor(ghost,ghostAction), ghost, curDepth, maxDepth)))
+                allGhostMins.append(max(ghostMins, key=lambda a: a[1]))
+            
+        bestMove = "Stop"
+        if allGhostMins:
+            bestMove = max(ghostMins, key=lambda a: a[1])[0]
+
+        return bestMove
+
+    def max_value(self, gameState, agent, curDepth, maxDepth):
+        if gameState.isWin() or curDepth == maxDepth:
+            return gameState.getScore()
+        v = -9999999
+        for action in gameState.getLegalActions(agent):
+            v = max(v, self.min_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth))
+        return v
+
+    def min_value(self, gameState, agent, curDepth, maxDepth):
+        if gameState.isLose() or curDepth == maxDepth:
+            return gameState.getScore()
+        v = 9999999
+        for action in gameState.getLegalActions(agent):
+            v = min(v, self.max_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth))
+        return v
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
