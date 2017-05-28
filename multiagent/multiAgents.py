@@ -19,8 +19,16 @@ import random, util
 
 from game import Agent
 
+#Following statements are for testing only
 testIndex = 0
-maxTest = 20
+maxTest = 200
+import os
+try:
+    os.system("TASKKILL /F /IM notepad.exe")
+except Exception, e:
+    print str(e)
+
+#Next variable is needed for ReflexAgent()! DO NOT DELETE!
 totalPath = []
 
 class ReflexAgent(Agent):
@@ -262,8 +270,16 @@ class MinimaxAgent(MultiAgentSearchAgent):
         print >>f,"Game won?", gameState.isWin()
         print >>f,"Game lost?", gameState.isLose()
         f.close()
+        
         ############################################
-        return self.minimax_decision(gameState, self.depth)
+        result = self.minimax_decision(gameState, self.depth)
+
+        #Testing:
+        try:
+            os.startfile("result.txt")
+        except Exception, e:
+            print str(e)
+        return result
 
     #Code below adjusted from
     #   https://github.com/aimacode/aima-python/blob/master/games.py
@@ -293,10 +309,11 @@ class MinimaxAgent(MultiAgentSearchAgent):
         f.close()
         ############################################
         curDepth = 0
-        ghostAmount = gameState.getNumAgents()
+        ghostAmount = gameState.getNumAgents() - 1
         pacmanMoves = gameState.getLegalActions(0)
 
         allGhostMins = []
+        """
         for pacmanAction in pacmanMoves:
             nextState = gameState.generateSuccessor(0,pacmanAction)
             ##################################
@@ -310,65 +327,45 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 print >>f,"Continuing pacmanAction loop"
             print >>f,"Game won?", gameState.isWin()
             print >>f,"Game lost?", gameState.isLose()
-            print >>f,"nextState:\n",nextState
-            print >>f,"\n\npacmanMoves:", pacmanMoves
+            print >>f,"pacmanMoves:", pacmanMoves
             f.close()
             ##################################
-            for ghost in range(1, (ghostAmount)):
-                ghostMoves = nextState.getLegalActions(ghost)
-                ghostMins = []
-                for ghostAction in ghostMoves:
-                    ##################################
-                    # Output to figure things out in #
-                    #       minimax_decision()       #
-                    ##################################
-                    f = open('result.txt','a')
-                    if testIndex == 0:
-                        print >>f,"Starting ghostAction loop"
-                    else:
-                        print >>f, "Current Function: minimax_decision()"
-                        print >>f,"Continuing ghostAction loop"
-                    print >>f,"pacmanAction:", pacmanAction
-                    print >>f,"ghost:", ghost
-                    print >>f,"ghostMoves:", ghostMoves
-                    print >>f,"ghostAction:", ghostAction
-                    f.close()
-                    ##################################
-                    ghostMins.append((pacmanAction, self.min_value(nextState.generateSuccessor(ghost,ghostAction), ghost, curDepth, maxDepth)))
-                if ghostMins:
-                    allGhostMins.append(max(ghostMins, key=lambda a: a[1]))
-                ##################################
-                # Output to figure things out in #
-                #       minimax_decision()       #
-                ##################################
-                f = open('result.txt','a')
-                print >>f, "Current Function: minimax_decision()"
-                print >>f, "End of ghostAction loop"
-                print >>f,"pacmanAction:", pacmanAction
-                print >>f,"ghost:",ghost
-                print >>f,"ghostMoves:", ghostMoves
-                print >>f,"ghostMins:\n",ghostMins
-                f.close()
-                ##################################
+        """
+        for ghost in range(1, (ghostAmount + 1)):
+            allGhostMins.append(self.min_value(gameState, ghost, curDepth, maxDepth))
+            ##################################
+            # Output to figure things out in #
+            #       minimax_decision()       #
+            ##################################
+            f = open('result.txt','a')
+            print >>f, "Current Function: minimax_decision()"
+            print >>f,"ghost:",ghost
+            print >>f,"ghostMoves:", gameState.getLegalActions(ghost)
+            print >>f,"allGhostMins:\n", allGhostMins
+            f.close()
+            ##################################
 
             ##################################
             # Output to figure things out in #
             #       minimax_decision()       #
             ##################################
             f = open('result.txt','a')
+            print >>f, "\n~~~~~~~~~~\n"
             print >>f,"End of ghost loop"
+            print >>f,"allGhostMins:\n", allGhostMins
             f.close()
             ##################################
 
         bestMove = "Stop"
         if allGhostMins:
-            bestMove = max(allGhostMins, key=lambda a: a[1])[0]
+            bestMove = max(allGhostMins, key=lambda a: a[1])[1]
 
         ##################################
         # Output to figure things out in #
         #       minimax_decision()       #
         ##################################
         f = open('result.txt','a')
+        print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
         print >>f,"End of pacmanActions loop"
         print >>f,"curDepth:", curDepth
         print >>f,"maxDepth:", maxDepth
@@ -376,6 +373,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         print >>f,"pacmanMoves:", pacmanMoves
         print >>f,"allGhostMins:\n", allGhostMins
         print >>f,"bestMove:", bestMove
+        print >>f,"Game won?", gameState.isWin()
+        print >>f,"Game lost?", gameState.isLose()
         f.close()
         ##################################
 
@@ -383,15 +382,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def max_value(self, gameState, agent, curDepth, maxDepth):
         global testIndex
-        testIndex += 1
 
-        done = False
+        v = [-9999999, "None"]
 
-        if gameState.isWin() or testIndex >= maxTest: #or curDepth == maxDepth:
-            returnValue = self.evaluationFunction
-            done = True
-        v = -9999999
-        if not done:
+        if testIndex >= maxTest or curDepth == maxDepth:
+            returnValue = [self.evaluationFunction(gameState), "None"]
+        else:
             for action in gameState.getLegalActions(agent):
                 v = max(v, self.min_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth))
                 ##################################
@@ -410,7 +406,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 print >>f,"v:", v
                 print >>f,"Game won?", gameState.isWin()
                 print >>f,"Game lost?", gameState.isLose()
-                print >>f,"Done?", done
                 f.close()
                 ##################################
             returnValue = v
@@ -420,12 +415,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # Output to figure things out in #
         #           max_value()          #
         ##################################
+        testIndex += 1
         f = open('result.txt','a')
         print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-        if not done:
+        if v != -9999999:
             print >>f, "Done with action loop for maxValue()"
         else:
             print >>f, "Current Function: max_value()"
+            print >>f, "Legal actions for ghost:", gameState.getLegalActions(agent)
         print >>f, "Iteration:", (testIndex)
 
         print >>f,"curDepth:", curDepth
@@ -435,7 +432,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         print >>f,"returnValue:", returnValue
         print >>f,"Game won?", gameState.isWin()
         print >>f,"Game lost?", gameState.isLose()
-        print >>f,"Done?", done
         f.close()
         ##################################
 
@@ -443,17 +439,16 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def min_value(self, gameState, agent, curDepth, maxDepth):
         global testIndex
-        testIndex += 1
 
-        done = False
+        v = [9999999, "None"]
 
-        if gameState.isLose() or testIndex >= maxTest: #or curDepth == maxDepth:
-            returnValue = self.evaluationFunction
-            done = True
-        v = 9999999
-        if not done:
+        if testIndex >= maxTest or curDepth == maxDepth:
+            returnValue = [self.evaluationFunction(gameState), "None"]
+        else:
             for action in gameState.getLegalActions(0):
                 v = min(v, self.max_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth))
+                if v[1] == "None":
+                    v[1] = action
                 ##################################
                 # Output to figure things out in #
                 #           min_value()          #
@@ -469,7 +464,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 print >>f,"v:", v
                 print >>f,"Game won?", gameState.isWin()
                 print >>f,"Game lost?", gameState.isLose()
-                print >>f,"Done?", done
                 f.close()
                 ##################################
             returnValue = v
@@ -478,12 +472,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
         # Output to figure things out in #
         #           min_value()          #
         ##################################
+        testIndex += 1
         f = open('result.txt','a')
         print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-        if not done:
+        if v != 9999999:
             print >>f, "Done with action loop for minValue()"
         else:
             print >>f, "Current Function: min_value()"
+            print >>f, "Legal actions for Pacman:", gameState.getLegalActions(0)
         print >>f, "Iteration:", (testIndex)
 
         print >>f,"curDepth:", curDepth
@@ -493,7 +489,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         print >>f,"returnValue:", returnValue
         print >>f,"Game won?", gameState.isWin()
         print >>f,"Game lost?", gameState.isLose()
-        print >>f,"Done?", done
         f.close()
         ##################################
 
