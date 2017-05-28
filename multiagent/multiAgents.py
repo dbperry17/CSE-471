@@ -418,6 +418,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 print >>f, "v (a) (max):", v
                 print >>f,"curDepth:", curDepth
                 print >>f,"maxDepth:", maxDepth
+                print >>f, "Current ghost:", agent
+                print >>f, "Legal actions for Ghost:", gameState.getLegalActions(agent)
                 f.close()
                 ##################################
                 v = max(v, self.min_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth))
@@ -516,6 +518,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 print >>f, "v (a) (min):", v
                 print >>f,"curDepth:", curDepth
                 print >>f,"maxDepth:", maxDepth
+                print >>f, "Current ghost:", agent
+                print >>f, "Legal actions for Ghost:", gameState.getLegalActions(agent)
                 f.close()
                 ##################################
                 v = min(v, self.max_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth))
