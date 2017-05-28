@@ -17,6 +17,14 @@ import inspect
 import re
 import sys
 
+#MY ADDITIONS!
+import os
+def line_prepender(filename, line):
+    with open(filename, 'r+') as f:
+        content = f.read()
+        f.seek(0, 0)
+        f.write(line.rstrip('\r\n') + '\n\n\n' + content)
+
 
 # Class which models a question in a project.  Note that questions have a
 # maximum number of points they are worth, and are composed of a series of
@@ -164,8 +172,19 @@ class TestCase(object):
 
     def testFail(self, grades):
         grades.addMessage('FAIL: %s' % (self.path,))
+        
+        #MY ADDITION! FOR TESTING ONLY!
+        myTup = "TEST FAILED: ", self.path,
+        myString = ''.join(map(str, myTup))
+        line_prepender("result.txt", myString)
+        try:
+            os.startfile("result.txt")
+        except Exception, e:
+            print str(e)
+        
         for line in self.messages:
             grades.addMessage('    %s' % (line,))
+            
         return False
 
     # This should really be question level?

@@ -356,9 +356,3 @@ if __name__ == '__main__':
         evaluate(options.generateSolutions, options.testRoot, moduleDict,
             edxOutput=options.edxOutput, muteOutput=options.muteOutput, printTestCase=options.printTestCase,
             questionToGrade=options.gradeQuestion, display=getDisplay(options.gradeQuestion!=None, options))
-
-#MY ADDITION! FOR TESTING ONLY!
-    try:
-        os.startfile("result.txt")
-    except Exception, e:
-        print str(e)
