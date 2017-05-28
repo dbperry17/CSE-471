@@ -27,6 +27,13 @@ try:
 except:
     pass
 
+#MY ADDITION! FOR TESTING ONLY!
+try:
+    os.system("TASKKILL /F /IM notepad.exe")
+except Exception, e:
+    print str(e)
+
+
 # register arguments and set default values
 def readCommand(argv):
     parser = optparse.OptionParser(description = 'Run public tests on student code')
@@ -349,3 +356,9 @@ if __name__ == '__main__':
         evaluate(options.generateSolutions, options.testRoot, moduleDict,
             edxOutput=options.edxOutput, muteOutput=options.muteOutput, printTestCase=options.printTestCase,
             questionToGrade=options.gradeQuestion, display=getDisplay(options.gradeQuestion!=None, options))
+
+#MY ADDITION! FOR TESTING ONLY!
+    try:
+        os.startfile("result.txt")
+    except Exception, e:
+        print str(e)

@@ -137,7 +137,7 @@ class ReflexAgent(Agent):
         curScaredTimes = [ghostState.scaredTimer for ghostState in curGhostStates]
 
         #Other stuff to get
-        score = successorGameState.getScore()
+        score = successorGameState.getScore() 
         newGhostPos = successorGameState.getGhostPositions()
 
         ############################
