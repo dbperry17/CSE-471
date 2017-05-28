@@ -22,11 +22,6 @@ from game import Agent
 #Following statements are for testing only
 testIndex = 0
 maxTest = 200
-import os
-try:
-    os.system("TASKKILL /F /IM notepad.exe")
-except Exception, e:
-    print str(e)
 
 #Next variable is needed for ReflexAgent()! DO NOT DELETE!
 totalPath = []
@@ -260,6 +255,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
+
+
         ############################################
         # Setup for output to figure things out in #
         #                getAction()               #
@@ -274,11 +271,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         ############################################
         result = self.minimax_decision(gameState, self.depth)
 
-        #Testing:
-        try:
-            os.startfile("result.txt")
-        except Exception, e:
-            print str(e)
         return result
 
     #Code below adjusted from
@@ -382,10 +374,25 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def max_value(self, gameState, agent, curDepth, maxDepth):
         global testIndex
+        ##################################
+        # Output to figure things out in #
+        #           max_value()          #
+        ##################################
+        f = open('result.txt','a')
+        print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        print >>f, "Current Function: max_value()"
+        print >>f, "Iteration:", (testIndex)
+        print >>f,"Game won?", gameState.isWin()
+        print >>f,"Game lost?", gameState.isLose()
+        print >>f, "curDepth:", curDepth
+        print >>f, "maxDepth:", maxDepth
+        f.close()
+        ##################################
 
         v = [-9999999, "None"]
 
-        if testIndex >= maxTest or curDepth == maxDepth:
+        if (testIndex >= maxTest) or \
+           ((gameState.isLose() or gameState.isWin()) or curDepth == maxDepth):
             returnValue = [self.evaluationFunction(gameState), "None"]
         else:
             for action in gameState.getLegalActions(agent):
@@ -439,10 +446,25 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def min_value(self, gameState, agent, curDepth, maxDepth):
         global testIndex
+        ##################################
+        # Output to figure things out in #
+        #           min_value()          #
+        ##################################
+        f = open('result.txt','a')
+        print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
+        print >>f, "Current Function: min_value()"
+        print >>f, "Iteration:", (testIndex)
+        print >>f,"Game won?", gameState.isWin()
+        print >>f,"Game lost?", gameState.isLose()
+        print >>f, "curDepth:", curDepth
+        print >>f, "maxDepth:", maxDepth
+        f.close()
+        ##################################
 
         v = [9999999, "None"]
 
-        if testIndex >= maxTest or curDepth == maxDepth:
+        if (testIndex >= maxTest) or \
+           ((gameState.isLose() or gameState.isWin()) or curDepth == maxDepth):
             returnValue = [self.evaluationFunction(gameState), "None"]
         else:
             for action in gameState.getLegalActions(0):
