@@ -237,6 +237,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
       Your minimax agent (question 2)
     """
     startTest = True
+    minRecNum = 0
+    maxRecNum = 0
 
     def getAction(self, gameState):
         """
@@ -294,292 +296,87 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def minimax_decision(self, gameState, maxDepth):
         # Body of minimax_decision:
-
-        ############################################
-        # Setup for output to figure things out in #
-        #            minimax_decision()            #
-        ############################################
-        global testIndex
-        f = open('result.txt','a')
-        print >>f, "Iteration:", (testIndex)
-        print >>f, "Current Function: minimax_decision()"
-        print >>f,"Game won?", gameState.isWin()
-        print >>f,"Game lost?", gameState.isLose()
-        f.close()
-        ############################################
         curDepth = 0
-        ghostAmount = gameState.getNumAgents() - 1
+        agentNum = gameState.getNumAgents()
         pacmanMoves = gameState.getLegalActions(0)
 
         allGhostMins = []
         
+
         for pacmanAction in pacmanMoves:
             nextState = gameState.generateSuccessor(0,pacmanAction)
-            ##################################
-            # Output to figure things out in #
-            #       minimax_decision()       #
-            ##################################
-            f = open('result.txt','a')
-            if testIndex == 0:
-                print >>f,"Start of pacmanAction loop"
-            else:
-                print >>f,"Continuing pacmanAction loop"
-            print >>f,"Game won?", gameState.isWin()
-            print >>f,"Game lost?", gameState.isLose()
-            print >>f,"pacmanMoves:", pacmanMoves
-            f.close()
-            ##################################
             ghostMins = []
-            for ghost in range(1, (ghostAmount + 1)):
-                ghostMins.append(self.min_value(nextState, ghost, curDepth, maxDepth))
-                ##################################
-                # Output to figure things out in #
-                #       minimax_decision()       #
-                ##################################
-                f = open('result.txt','a')
-                print >>f, "Current Function: minimax_decision()"
-                print >>f,"ghost:",ghost
-                print >>f,"ghostMoves:", gameState.getLegalActions(ghost)
-                print >>f,"allGhostMins:\n", allGhostMins
-                f.close()
-                ##################################
-            allGhostMins.append([max(ghostMins), pacmanAction])
-            ##################################
-            # Output to figure things out in #
-            #       minimax_decision()       #
-            ##################################
-            f = open('result.txt','a')
-            print >>f, "\n~~~~~~~~~~\n"
-            print >>f,"End of ghost loop"
-            print >>f,"allGhostMins:\n", allGhostMins
-            f.close()
-            ##################################
+            for ghost in range(1, (agentNum)):
+                ghostMins.append(self.min_value(nextState, ghost, curDepth, maxDepth, agentNum))
+            allGhostMins.append([min(ghostMins), pacmanAction])
 
         bestMove = "Stop"
         if allGhostMins:
             bestMove = max(allGhostMins)
+        print "\nallGhostMins:", allGhostMins
+        print "bestMove:", bestMove
 
-        ##################################
-        # Output to figure things out in #
-        #       minimax_decision()       #
-        ##################################
-        f = open('result.txt','a')
-        print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-        print >>f,"End of pacmanActions loop"
-        print >>f,"curDepth:", curDepth
-        print >>f,"maxDepth:", maxDepth
-        print >>f,"ghostAmount:", ghostAmount
-        print >>f,"pacmanMoves:", pacmanMoves
-        print >>f,"allGhostMins:\n", allGhostMins
-        print >>f,"bestMove:", bestMove
-        print >>f,"Game won?", gameState.isWin()
-        print >>f,"Game lost?", gameState.isLose()
-        print >>f,"Iteration", testIndex
-        f.close()
-        ##################################
+        return bestMove[1]
 
-        return bestMove
-
-    def max_value(self, gameState, agent, curDepth, maxDepth):
+    def max_value(self, gameState, agent, curDepth, maxDepth, agentNum):
         global testIndex
-        """
-        ##################################
-        # Output to figure things out in #
-        #           max_value()          #
-        ##################################
-        f = open('result.txt','a')
-        print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-        print >>f, "Current Function: max_value()"
-        print >>f, "Iteration:", (testIndex)
-        print >>f,"Game won?", gameState.isWin()
-        print >>f,"Game lost?", gameState.isLose()
-        print >>f, "curDepth:", curDepth
-        print >>f, "maxDepth:", maxDepth
-        f.close()
-        ##################################
-        """
-
+        testIndex += 1
+        self.maxRecNum += 1
         v = -9999999
 
         if (testIndex >= maxTest) or \
            ((gameState.isLose() or gameState.isWin()) or curDepth == maxDepth):
-        #if (testIndex >= maxTest) or \
-        #   gameState.isWin() or \
-        #   (curDepth == maxDepth):
             returnValue = self.evaluationFunction(gameState)
         else:
-            for action in gameState.getLegalActions(0):
-                ##################################
-                # Output to figure things out in #
-                #           max_value()          #
-                ##################################
-                f = open('result.txt','a')
-                print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-                print >>f, "v (a) (max):", v
-                print >>f,"curDepth:", curDepth
-                print >>f,"maxDepth:", maxDepth
-                print >>f, "Current ghost:", agent
-                print >>f, "Legal actions for Ghost:", gameState.getLegalActions(agent)
-                f.close()
-                ##################################
-                v = max(v, self.min_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth))
-                ##################################
-                # Output to figure things out in #
-                #           max_value()          #
-                ##################################
-                f = open('result.txt','a')
-                print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-                print >>f, "Iteration:", (testIndex)
-                print >>f, "Currently inside action loop for max_value()"
-                print >>f, "Legal actions for Pacman:", gameState.getLegalActions(0)
-                print >>f, "Current action:", action
-                print >>f,"curDepth:", curDepth
-                print >>f,"maxDepth:", maxDepth
-                print >>f,"v (b) (max):", v
-                print >>f,"Game won?", gameState.isWin()
-                print >>f,"Game lost?", gameState.isLose()
-                f.close()
-                ##################################
+            if curDepth % agentNum == 0:
+                for action in gameState.getLegalActions(0):
+                    v = max(v, self.min_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth, agentNum))
+            else:
+                for action in gameState.getLegalActions(agent):
+                    v = max(v, self.min_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth, agentNum))
             returnValue = v
-            ##################################
-            # Output to figure things out in #
-            #           max_value()          #
-            ##################################
-            f = open('result.txt','a')
-            print >>f, "\n~~~~~~~~~~\n"
-            print >>f, "All legal actions for Pacman at depth", \
-                  curDepth,"tested in max_value."
-            print >>f, "returnValue:", returnValue
-            f.close()
-            ##################################
-
-
-        ##################################
-        # Output to figure things out in #
-        #           max_value()          #
-        ##################################
-        testIndex += 1
+            
         f = open('result.txt','a')
         print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-        if v != -9999999:
-            print >>f, "Done with action loop for maxValue()"
-        else:
-            print >>f, "Current Function: max_value()"
-            print >>f, "Legal actions for pacman:", gameState.getLegalActions(0)
-        print >>f, "Iteration:", (testIndex)
-
-        print >>f,"curDepth:", curDepth
-        print >>f,"maxDepth:", maxDepth
+        print >>f, "max returnValue:", returnValue
+        print >>f, "max v:", v
         print >>f, "Current ghost:", agent
-        print >>f,"v:", v
-        print >>f,"returnValue:", returnValue
-        print >>f,"Game won?", gameState.isWin()
-        print >>f,"Game lost?", gameState.isLose()
-        f.close()
-        ##################################
-
-        return returnValue
-
-    def min_value(self, gameState, agent, curDepth, maxDepth):
-        global testIndex
-        """
-        ##################################
-        # Output to figure things out in #
-        #           min_value()          #
-        ##################################
-        f = open('result.txt','a')
-        print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-        print >>f, "Current Function: min_value()"
-        print >>f, "Iteration:", (testIndex)
-        print >>f,"Game won?", gameState.isWin()
-        print >>f,"Game lost?", gameState.isLose()
         print >>f, "curDepth:", curDepth
         print >>f, "maxDepth:", maxDepth
+        print >>f, "curDepth % agentNum:", curDepth % agentNum
         f.close()
-        ##################################
-        """
+        
+        return returnValue
 
+    def min_value(self, gameState, agent, curDepth, maxDepth, agentNum):
+        global testIndex
+        testIndex += 1
+        self.minRecNum += 1
         v = 9999999
 
         if (testIndex >= maxTest) or \
            ((gameState.isLose() or gameState.isWin()) or curDepth == maxDepth):
-        #if (testIndex >= maxTest) or \
-        #   gameState.isLose() or \
-        #   (curDepth == maxDepth):
             returnValue = self.evaluationFunction(gameState)
-        else:
-            for action in gameState.getLegalActions(agent):
-                ##################################
-                # Output to figure things out in #
-                #           min_value()          #
-                ##################################
-                f = open('result.txt','a')
-                print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-                print >>f, "v (a) (min):", v
-                print >>f,"curDepth:", curDepth
-                print >>f,"maxDepth:", maxDepth
-                print >>f, "Current ghost:", agent
-                print >>f, "Legal actions for Ghost:", gameState.getLegalActions(agent)
-                f.close()
-                ##################################
-                v = min(v, self.max_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth))
-                ##################################
-                # Output to figure things out in #
-                #           min_value()          #
-                ##################################
-                f = open('result.txt','a')
-                print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-                print >>f, "Iteration:", (testIndex)
-                print >>f, "Currently inside action loop for min_value()"
-                print >>f, "Current Ghost:", agent
-                print >>f, "Legal actions for Ghost:", gameState.getLegalActions(agent)
-                print >>f, "Current action:", action
-                print >>f,"curDepth:", curDepth
-                print >>f,"maxDepth:", maxDepth
-                print >>f,"v (b) (min):", v
-                print >>f,"Game won?", gameState.isWin()
-                print >>f,"Game lost?", gameState.isLose()
-                f.close()
-                ##################################
+        else:            
+            if curDepth % agentNum == 0:
+                for action in gameState.getLegalActions(agent):
+                    v = min(v, self.max_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth, agentNum))
+            else:
+                for action in gameState.getLegalActions(0):
+                    v = min(v, self.max_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth, agentNum))
             returnValue = v
-            ##################################
-            # Output to figure things out in #
-            #           min_value()          #
-            ##################################
-            f = open('result.txt','a')
-            print >>f, "\n~~~~~~~~~~\n"
-            print >>f, "All legal actions for Ghost", agent,\
-                  "at depth", curDepth,"tested in min_value."
-            print >>f, "returnValue:", returnValue
-            f.close()
-            ##################################
 
 
-        ##################################
-        # Output to figure things out in #
-        #           min_value()          #
-        ##################################
-        testIndex += 1
         f = open('result.txt','a')
         print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-        if v != 9999999:
-            print >>f, "Done with action loop for minValue()"
-        else:
-            print >>f, "Current Function: min_value()"
-            print >>f, "Legal actions for Ghost:", gameState.getLegalActions(agent)
-        print >>f, "Iteration:", (testIndex)
-
-        print >>f,"curDepth:", curDepth
-        print >>f,"maxDepth:", maxDepth
+        print >>f, "min returnValue:", returnValue
+        print >>f, "min v:", v
         print >>f, "Current ghost:", agent
-        print >>f,"v:", v
-        print >>f,"returnValue:", returnValue
-        print >>f,"Game won?", gameState.isWin()
-        print >>f,"Game lost?", gameState.isLose()
-        f.close()
-        ##################################
-
+        print >>f, "curDepth:", curDepth
+        print >>f, "maxDepth:", maxDepth
+        print >>f, "curDepth % agentNum:", curDepth % agentNum
         return returnValue
+        f.close()
     """
     def max_value(self, gameState, agent, curDepth, maxDepth):
         global testIndex
