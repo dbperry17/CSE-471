@@ -307,7 +307,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             nextState = gameState.generateSuccessor(0,pacmanAction)
             ghostMins = []
             for ghost in range(1, (agentNum)):
-                ghostMins.append(self.min_value(nextState, ghost, curDepth, maxDepth, agentNum))
+                ghostMins.append(self.min_value(nextState, ghost, curDepth + 1, maxDepth, agentNum))
             allGhostMins.append([min(ghostMins), pacmanAction])
 
         bestMove = "Stop"
@@ -323,27 +323,55 @@ class MinimaxAgent(MultiAgentSearchAgent):
         testIndex += 1
         self.maxRecNum += 1
         v = -9999999
+        returnValue = -9999999
+        gameDone = gameState.isLose() or gameState.isWin()
+        path = "maxValue, "
 
         if (testIndex >= maxTest) or \
-           ((gameState.isLose() or gameState.isWin()) or curDepth == maxDepth):
+           (gameDone or curDepth == maxDepth):
             returnValue = self.evaluationFunction(gameState)
+            f = open('result.txt','a')
+            print >>f, "\n~~~~~~~~~\n"
+            print >>f, "min_value()"
+            print >>f, "gameDone:", gameDone
+            print >>f, "curDepth:", curDepth
+            print >>f, "returnValue:", returnValue
+            f.close()
+            path += "pathEnd"
         else:
-            if curDepth % agentNum == 0:
+            if (curDepth + 1) % agentNum == 0:
+                path += "Pacman"
                 for action in gameState.getLegalActions(0):
-                    v = max(v, self.min_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth, agentNum))
-            else:
+                    v = max(v, self.max_value(gameState.generateSuccessor(0, action), agent,
+                                              curDepth + 1, maxDepth, agentNum))
+                    f = open('result.txt','a')
+                    print >>f, "v =", v
+                    print >>f, "legal actions:", gameState.getLegalActions(0)
+                    print >>f, "current action:", action
+                    f.close()
+            else:            
+                path += "Ghost"
                 for action in gameState.getLegalActions(agent):
-                    v = max(v, self.min_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth, agentNum))
-            returnValue = v
+                    v = max(v, self.min_value(gameState.generateSuccessor(agent, action), agent,
+                                              curDepth + 1, maxDepth, agentNum))
+                    f = open('result.txt','a')
+                    print >>f, "\n~~~~~~~~~\n"
+                    print >>f, "v =", v
+                    print >>f, "legal actions:", gameState.getLegalActions(agent)
+                    print >>f, "current action:", action
+                    f.close()
+                    
+        returnValue = max(v, returnValue)
             
         f = open('result.txt','a')
         print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
         print >>f, "max returnValue:", returnValue
         print >>f, "max v:", v
+        print >>f, "path:", path
         print >>f, "Current ghost:", agent
         print >>f, "curDepth:", curDepth
         print >>f, "maxDepth:", maxDepth
-        print >>f, "curDepth % agentNum:", curDepth % agentNum
+        print >>f, "(curDepth + 1) % agentNum:", (curDepth + 1) % agentNum
         f.close()
         
         return returnValue
@@ -353,28 +381,57 @@ class MinimaxAgent(MultiAgentSearchAgent):
         testIndex += 1
         self.minRecNum += 1
         v = 9999999
+        returnValue = 9999999
+        gameDone = gameState.isLose() or gameState.isWin()
+        path = "minValue, "
 
         if (testIndex >= maxTest) or \
-           ((gameState.isLose() or gameState.isWin()) or curDepth == maxDepth):
+           (gameDone or curDepth == maxDepth):
             returnValue = self.evaluationFunction(gameState)
-        else:            
-            if curDepth % agentNum == 0:
-                for action in gameState.getLegalActions(agent):
-                    v = min(v, self.max_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth, agentNum))
-            else:
+            f = open('result.txt','a')
+            print >>f, "\n~~~~~~~~~\n"
+            print >>f, "min_value()"
+            print >>f, "gameDone:", gameDone
+            print >>f, "curDepth:", curDepth
+            print >>f, "returnValue:", returnValue
+            f.close()
+            path += "pathEnd"
+        else:
+            if (curDepth + 1) % agentNum == 0:
+                path += "Pacman"
                 for action in gameState.getLegalActions(0):
-                    v = min(v, self.max_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth, agentNum))
-            returnValue = v
+                    v = min(v, self.max_value(gameState.generateSuccessor(0, action),
+                                                   agent, curDepth + 1, maxDepth, agentNum))
+                    f = open('result.txt','a')
+                    print >>f, "\n~~~~~~~~~\n"
+                    print >>f, "v =", v
+                    print >>f, "legal actions:", gameState.getLegalActions(0)
+                    print >>f, "current action:", action
+                    f.close()
+            else:
+                path += "Ghost"
+                for action in gameState.getLegalActions(agent):
+                    v = min(v, self.min_value(gameState.generateSuccessor(agent, action),
+                                                   agent, curDepth + 1, maxDepth, agentNum))
+                    f = open('result.txt','a')
+                    print >>f, "\n~~~~~~~~~\n"
+                    print >>f, "v =", v
+                    print >>f, "legal actions:", gameState.getLegalActions(agent)
+                    print >>f, "current action:", action
+                    f.close()
 
+
+        returnValue = min(v, returnValue)
 
         f = open('result.txt','a')
         print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
         print >>f, "min returnValue:", returnValue
         print >>f, "min v:", v
+        print >>f, "path:", path
         print >>f, "Current ghost:", agent
         print >>f, "curDepth:", curDepth
         print >>f, "maxDepth:", maxDepth
-        print >>f, "curDepth % agentNum:", curDepth % agentNum
+        print >>f, "(curDepth + 1) % agentNum:", (curDepth + 1) % agentNum
         return returnValue
         f.close()
     """
