@@ -290,7 +290,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
 
         """
-        STOP HITTING UNDO!!!!
+        STOP HITTING UNDO!!!
         """
 
         return result
