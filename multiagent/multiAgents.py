@@ -286,6 +286,11 @@ class MinimaxAgent(MultiAgentSearchAgent):
         ############################################
         result = self.minimax_decision(gameState)
 
+
+        """
+        STOP HITTING UNDO!
+        """
+
         return result
 
     #Code below adjusted from
@@ -310,12 +315,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
             nextState = gameState.generateSuccessor(0,pacmanAction)
             ghostMins = []
             for ghost in range(1, self.agentTotal):
-                ghostMins.append(self.min_value(nextState, ghost, curDepth))
+                ghostMins.append(self.min_value(nextState, ghost, curDepth + 1))
             allGhostMins.append([min(ghostMins), pacmanAction])
 
         bestMove = "Stop"
         if allGhostMins:
             bestMove = max(allGhostMins)
+        #print "\nallGhostMins:", allGhostMins
+        #print "bestMove:", bestMove
 
         return bestMove[1]
 
@@ -326,15 +333,15 @@ class MinimaxAgent(MultiAgentSearchAgent):
         v = -9999999
         returnValue = -9999999
         gameDone = gameState.isLose() or gameState.isWin()
-        modOp = curDepth % self.agentTotal
+        modOp = (curDepth + 1) % self.agentTotal
 
         if (testIndex >= maxTest) or \
-           (gameDone or curDepth == self.maxDepth):
+           (gameDone or (curDepth - 1) == self.maxDepth):
             returnValue = self.evaluationFunction(gameState)
         else:
             if modOp == 0:
                 for action in gameState.getLegalActions(0):
-                    v = max(v, self.min_value(gameState.generateSuccessor(0, action),
+                    v = max(v, self.max_value(gameState.generateSuccessor(0, action),
                                               agent, curDepth + 1))
             else:
                 for action in gameState.getLegalActions(agent):
@@ -352,19 +359,19 @@ class MinimaxAgent(MultiAgentSearchAgent):
         v = 9999999
         returnValue = 9999999
         gameDone = gameState.isLose() or gameState.isWin()
-        modOp = curDepth % self.agentTotal
+        modOp = (curDepth + 1) % self.agentTotal
 
         if (testIndex >= maxTest) or \
-           (gameDone or curDepth == self.maxDepth):
+           (gameDone or (curDepth - 1) == self.maxDepth):
             returnValue = self.evaluationFunction(gameState)
         else:
-            if modOp != 0:
+            if modOp == 0:
                 for action in gameState.getLegalActions(0):
                     v = min(v, self.max_value(gameState.generateSuccessor(0, action),
                                               agent, curDepth + 1))
             else:
                 for action in gameState.getLegalActions(agent):
-                    v = min(v, self.max_value(gameState.generateSuccessor(agent, action),
+                    v = min(v, self.min_value(gameState.generateSuccessor(agent, action),
                                               agent, curDepth + 1))
 
         returnValue = min(v, returnValue)
