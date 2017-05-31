@@ -288,7 +288,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
 
         """
-        STOP HITTING UNDO!
+        STOP HITTING UNDO!!!
         """
 
         return result
@@ -321,8 +321,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         bestMove = "Stop"
         if allGhostMins:
             bestMove = max(allGhostMins)
-        #print "\nallGhostMins:", allGhostMins
-        #print "bestMove:", bestMove
+        print "\nallGhostMins:", allGhostMins
+        print "bestMove:", bestMove
 
         return bestMove[1]
 
@@ -334,10 +334,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
         returnValue = -9999999
         gameDone = gameState.isLose() or gameState.isWin()
         modOp = (curDepth + 1) % self.agentTotal
+        loopMax = False
 
-        if (testIndex >= maxTest) or \
-           (gameDone or (curDepth - 1) == self.maxDepth):
+        if (gameDone or (curDepth - 1) == self.maxDepth):
             returnValue = self.evaluationFunction(gameState)
+        elif (testIndex >= maxTest): #testing
+            loopMax = True
         else:
             if modOp == 0:
                 for action in gameState.getLegalActions(0):
@@ -350,6 +352,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         returnValue = max(v, returnValue)
 
+        if loopMax: #testing
+            returnValue = -1
+
         return returnValue
 
     def min_value(self, gameState, agent, curDepth):
@@ -360,10 +365,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
         returnValue = 9999999
         gameDone = gameState.isLose() or gameState.isWin()
         modOp = (curDepth + 1) % self.agentTotal
+        loopMax = False
 
-        if (testIndex >= maxTest) or \
-           (gameDone or (curDepth - 1) == self.maxDepth):
+        if (gameDone or (curDepth - 1) == self.maxDepth):
             returnValue = self.evaluationFunction(gameState)
+        elif (testIndex >= maxTest): #testing
+            loopMax = True
         else:
             if modOp == 0:
                 for action in gameState.getLegalActions(0):
@@ -375,6 +382,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
                                               agent, curDepth + 1))
 
         returnValue = min(v, returnValue)
+
+        if loopMax: #testing
+            returnValue = -1
 
         return returnValue    
     """
