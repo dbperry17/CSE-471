@@ -310,18 +310,10 @@ class MinimaxAgent(MultiAgentSearchAgent):
         pacmanMoves = gameState.getLegalActions(0)
         ghostMins = []
 
-        for pacmanAction in pacmanMoves:
-            nextState = gameState.generateSuccessor(0,pacmanAction)
-            ghost = self.min_value(nextState, 1, curDepth + 1)
-            ghostMins.append([ghost, pacmanAction])
-
-        bestMove = [-1, "Stop"]
-        if ghostMins:
-            bestMove = max(ghostMins)
-
+        bestMove = self.max_value(gameState, 0, curDepth)
+        
         if self.loopMax: #testing
             bestMove = [-1, "Stop"]
-        print "\nghostMins:", ghostMins
         print "bestMove:", bestMove
 
         return bestMove[1]
@@ -329,23 +321,26 @@ class MinimaxAgent(MultiAgentSearchAgent):
     def max_value(self, gameState, agent, curDepth):
         global testIndex
         testIndex += 1
-        v = -9999999
-        returnValue = -9999999
+        v = [-9999999, "Stop"]
+        returnValue = [-9999999, "Stop"]
         gameDone = gameState.isLose() or gameState.isWin()
         modOp = (curDepth + 1) % self.agentTotal
 
         if gameDone or ((curDepth - 1) == self.maxDepth):
             if gameDone:
-                returnValue = self.evaluationFunction(gameState)
+                returnValue = [self.evaluationFunction(gameState), "Stop"]
             else:
-                tempVal = self.evaluationFunction(gameState)
+                tempVal = [self.evaluationFunction(gameState), "Stop"]
                 returnValue = tempVal
         elif (testIndex >= maxTest): #testing
             self.loopMax = True
         else:
             for action in gameState.getLegalActions(0):
-                v = max(v, self.min_value(gameState.generateSuccessor(0, action),
-                                          modOp, curDepth + 1))
+                v2 = self.min_value(gameState.generateSuccessor(0, action),
+                                          modOp, curDepth + 1)
+                v2[1] = action
+                v = max(v, v2)
+                
 
         returnValue = max(v, returnValue)
 
@@ -357,28 +352,32 @@ class MinimaxAgent(MultiAgentSearchAgent):
     def min_value(self, gameState, agent, curDepth):
         global testIndex
         testIndex += 1
-        v = 9999999
-        returnValue = 9999999
+        v = [9999999, "Stop"]
+        returnValue = [9999999, "Stop"]
         gameDone = gameState.isLose() or gameState.isWin()
         modOp = (agent + 1) % self.agentTotal
         
 
         if gameDone or ((curDepth - 1) == self.maxDepth):
             if gameDone:
-                returnValue = self.evaluationFunction(gameState)
+                returnValue = [self.evaluationFunction(gameState), "Stop"]
             else:
-                tempVal = self.evaluationFunction(gameState)
+                tempVal = [self.evaluationFunction(gameState), "Stop"]
                 returnValue = tempVal
         elif (testIndex >= maxTest): #testing
             self.loopMax = True
         else:
             for action in gameState.getLegalActions(modOp):
                 if modOp == 0:
-                    v = min(v, self.max_value(gameState.generateSuccessor(0, action),
-                                              modOp, curDepth + 1))
+                    v2 = self.max_value(gameState.generateSuccessor(0, action),
+                                              modOp, curDepth + 1)
+                    v2[1] = action
+                    v = min(v, v2)
                 else:
-                    v = min(v, self.min_value(gameState.generateSuccessor(agent, action),
-                                              modOp, curDepth + 1))
+                    v2 = self.min_value(gameState.generateSuccessor(agent, action),
+                                              modOp, curDepth + 1)
+                    v2[1] = action
+                    v = min(v, v2)
 
         returnValue = min(v, returnValue)
 
