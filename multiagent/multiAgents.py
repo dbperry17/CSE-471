@@ -306,11 +306,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def minimax_decision(self, gameState):
         # Body of minimax_decision:
-        curDepth = 0
-        pacmanMoves = gameState.getLegalActions(0)
-        ghostMins = []
-
-        bestMove = self.max_value(gameState, 0, curDepth)
+        bestMove = self.max_value(gameState, 0, 0)
         
         if self.loopMax: #testing
             bestMove = [-1, "Stop"]
