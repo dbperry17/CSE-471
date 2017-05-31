@@ -239,6 +239,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
     startTest = True
     minRecNum = 0
     maxRecNum = 0
+    agentTotal = 0
+    maxDepth = 0
 
     def getAction(self, gameState):
         """
@@ -276,9 +278,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
         print >>f,"Game won?", gameState.isWin()
         print >>f,"Game lost?", gameState.isLose()
         f.close()
+
+        self.maxDepth = self.depth
+        self.agentTotal = gameState.getNumAgents()
         
+                
         ############################################
-        result = self.minimax_decision(gameState, self.depth)
+        result = self.minimax_decision(gameState)
 
         return result
 
@@ -294,21 +300,17 @@ class MinimaxAgent(MultiAgentSearchAgent):
     # from the book. In fact, it is simply a python version of the algorithm
     # in figure 5.3 in the book.)
 
-    #old version
-    def minimax_decision(self, gameState, maxDepth):
+    def minimax_decision(self, gameState):
         # Body of minimax_decision:
         curDepth = 0
-        agentNum = gameState.getNumAgents()
         pacmanMoves = gameState.getLegalActions(0)
-
         allGhostMins = []
-
 
         for pacmanAction in pacmanMoves:
             nextState = gameState.generateSuccessor(0,pacmanAction)
             ghostMins = []
-            for ghost in range(1, (agentNum)):
-                ghostMins.append(self.min_value(nextState, ghost, curDepth, maxDepth, agentNum))
+            for ghost in range(1, self.agentTotal):
+                ghostMins.append(self.min_value(nextState, ghost, curDepth))
             allGhostMins.append([min(ghostMins), pacmanAction])
 
         bestMove = "Stop"
@@ -317,51 +319,55 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         return bestMove[1]
 
-    def max_value(self, gameState, agent, curDepth, maxDepth, agentNum):
+    def max_value(self, gameState, agent, curDepth):
         global testIndex
         testIndex += 1
         self.maxRecNum += 1
         v = -9999999
+        returnValue = -9999999
         gameDone = gameState.isLose() or gameState.isWin()
+        modOp = curDepth % self.agentTotal
 
         if (testIndex >= maxTest) or \
-           (gameDone or curDepth == maxDepth):
+           (gameDone or curDepth == self.maxDepth):
             returnValue = self.evaluationFunction(gameState)
         else:
-            if curDepth % agentNum == 0:
+            if modOp == 0:
                 for action in gameState.getLegalActions(0):
-                    v = max(v, self.min_value(gameState.generateSuccessor(0, action), agent,
-                                              curDepth + 1, maxDepth, agentNum))
+                    v = max(v, self.min_value(gameState.generateSuccessor(0, action),
+                                              agent, curDepth + 1))
             else:
                 for action in gameState.getLegalActions(agent):
-                    v = max(v, self.min_value(gameState.generateSuccessor(agent, action), agent,
-                                              curDepth + 1, maxDepth, agentNum))
+                    v = max(v, self.min_value(gameState.generateSuccessor(agent, action),
+                                              agent, curDepth + 1))
 
-            returnValue = v
+        returnValue = max(v, returnValue)
 
         return returnValue
 
-    def min_value(self, gameState, agent, curDepth, maxDepth, agentNum):
+    def min_value(self, gameState, agent, curDepth):
         global testIndex
         testIndex += 1
         self.minRecNum += 1
         v = 9999999
+        returnValue = 9999999
         gameDone = gameState.isLose() or gameState.isWin()
+        modOp = curDepth % self.agentTotal
 
         if (testIndex >= maxTest) or \
-           (gameDone or curDepth == maxDepth):
+           (gameDone or curDepth == self.maxDepth):
             returnValue = self.evaluationFunction(gameState)
         else:
-            if curDepth % agentNum != 0:
+            if modOp != 0:
                 for action in gameState.getLegalActions(0):
-                    v = min(v, self.max_value(gameState.generateSuccessor(0, action), agent,
-                                              curDepth + 1, maxDepth, agentNum))
+                    v = min(v, self.max_value(gameState.generateSuccessor(0, action),
+                                              agent, curDepth + 1))
             else:
                 for action in gameState.getLegalActions(agent):
-                    v = min(v, self.max_value(gameState.generateSuccessor(agent, action), agent,
-                                              curDepth + 1, maxDepth, agentNum))
+                    v = min(v, self.max_value(gameState.generateSuccessor(agent, action),
+                                              agent, curDepth + 1))
 
-            returnValue = v
+        returnValue = min(v, returnValue)
 
         return returnValue    
     """
@@ -506,91 +512,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         f.close()
         return returnValue
     """
-    """
-    def minimax_decision(self, gameState, maxDepth):
-        # Body of minimax_decision:
-        curDepth = 0
-        agentNum = gameState.getNumAgents()
-        pacmanMoves = gameState.getLegalActions(0)
-
-        allGhostMins = []
-        
-
-        for pacmanAction in pacmanMoves:
-            nextState = gameState.generateSuccessor(0,pacmanAction)
-            ghostMins = []
-            for ghost in range(1, (agentNum)):
-                ghostMins.append(self.min_value(nextState, ghost, curDepth, maxDepth, agentNum))
-            allGhostMins.append([min(ghostMins), pacmanAction])
-
-        bestMove = "Stop"
-        if allGhostMins:
-            bestMove = max(allGhostMins)
-        print "\nallGhostMins:", allGhostMins
-        print "bestMove:", bestMove
-
-        return bestMove[1]
-
-    def max_value(self, gameState, agent, curDepth, maxDepth, agentNum):
-        global testIndex
-        testIndex += 1
-        self.maxRecNum += 1
-        v = -9999999
-
-        if (testIndex >= maxTest) or \
-           ((gameState.isLose() or gameState.isWin()) or curDepth == maxDepth):
-            returnValue = self.evaluationFunction(gameState)
-        else:
-            if curDepth % agentNum == 0:
-                for action in gameState.getLegalActions(0):
-                    v = max(v, self.min_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth, agentNum))
-            else:
-                for action in gameState.getLegalActions(agent):
-                    v = max(v, self.min_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth, agentNum))
-            returnValue = v
-            
-        f = open('result.txt','a')
-        print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-        print >>f, "max returnValue:", returnValue
-        print >>f, "max v:", v
-        print >>f, "Current ghost:", agent
-        print >>f, "curDepth:", curDepth
-        print >>f, "maxDepth:", maxDepth
-        print >>f, "curDepth % agentNum:", curDepth % agentNum
-        f.close()
-        
-        return returnValue
-
-    def min_value(self, gameState, agent, curDepth, maxDepth, agentNum):
-        global testIndex
-        testIndex += 1
-        self.minRecNum += 1
-        v = 9999999
-
-        if (testIndex >= maxTest) or \
-           ((gameState.isLose() or gameState.isWin()) or curDepth == maxDepth):
-            returnValue = self.evaluationFunction(gameState)
-        else:            
-            if curDepth % agentNum == 0:
-                for action in gameState.getLegalActions(agent):
-                    v = min(v, self.max_value(gameState.generateSuccessor(agent, action), agent, curDepth + 1, maxDepth, agentNum))
-            else:
-                for action in gameState.getLegalActions(0):
-                    v = min(v, self.max_value(gameState.generateSuccessor(0, action), agent, curDepth + 1, maxDepth, agentNum))
-            returnValue = v
-
-
-        f = open('result.txt','a')
-        print >>f, "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
-        print >>f, "min returnValue:", returnValue
-        print >>f, "min v:", v
-        print >>f, "Current ghost:", agent
-        print >>f, "curDepth:", curDepth
-        print >>f, "maxDepth:", maxDepth
-        print >>f, "curDepth % agentNum:", curDepth % agentNum
-        f.close()
-        return returnValue
-    """
+    
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
       Your minimax agent with alpha-beta pruning (question 3)
