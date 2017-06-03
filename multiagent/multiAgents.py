@@ -282,11 +282,14 @@ class MinimaxAgent(MultiAgentSearchAgent):
         print >>f,"Game lost?", gameState.isLose()
         f.close()
         ############################################
+
         self.maxDepth = self.depth
-        self.movesLeft = self.depth
+        #Technically unneeded, but I prefer this variable
+        #name instead.
+        
+        self.movesLeft = self.depth - 1
         self.agentTotal = gameState.getNumAgents()
         result = self.minimax_decision(gameState)
-
 
         """
         STOP HITTING UNDO!
@@ -333,7 +336,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             if (curDepth > self.maxDepth):
                 self.movesLeft += -1
                 if self.movesLeft > 0:
-                    curDepth = 0
+                    curDepth = 1
                 else:
                     returnValue = [self.evaluationFunction(gameState), "Stop2"]
                     done = True
@@ -359,6 +362,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         returnValue = [9999999, "Stop"]
         gameDone = gameState.isLose() or gameState.isWin()
         modOp = (agent + 1) % self.agentTotal
+        done = False
         
 
         if gameDone:
@@ -366,25 +370,28 @@ class MinimaxAgent(MultiAgentSearchAgent):
         elif (testIndex >= maxTest): #testing
             self.loopMax = True
         else:
-            #if (curDepth > self.maxDepth) and (agent == 0):
+            #if (curDepth > self.maxDepth):
             #    if self.movesLeft > 0:
             #        self.movesLeft += -1
             #        curDepth = 0
             #    else:
             #        returnValue = [self.evaluationFunction(gameState), "Stop4"]
-            for action in gameState.getLegalActions(modOp):
-                if modOp == 0:
-                    v2 = self.max_value(gameState.generateSuccessor(0, action),
-                                              0, curDepth + 1)
-                    v2[1] = action
-                    v = min(v, v2)
-                else:
-                    v2 = self.min_value(gameState.generateSuccessor(agent, action),
-                                              modOp, curDepth + 1)
-                    v2[1] = action
-                    v = min(v, v2)
+            #        done = True
+            if not done:
+                for action in gameState.getLegalActions(modOp):
+                    if modOp == 0:
+                        v2 = self.max_value(gameState.generateSuccessor(0, action),
+                                                  0, curDepth + 1)
+                        v2[1] = action
+                        v = min(v, v2)
+                    else:
+                        v2 = self.min_value(gameState.generateSuccessor(agent, action),
+                                                  modOp, curDepth + 1)
+                        v2[1] = action
+                        v = min(v, v2)
 
-        returnValue = min(v, returnValue)
+        if not done:
+            returnValue = min(v, returnValue)
 
         if self.loopMax: #testing
             returnValue = -1
