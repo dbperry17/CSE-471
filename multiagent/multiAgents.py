@@ -238,6 +238,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
     #Testing
     startTest = True
+    statesExpanded = 0
 
     #Needed
     agentTotal = 0
@@ -261,6 +262,103 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
+
+        """
+        ############################################
+        # Setup for output to figure things out in #
+        #                getAction()               #
+        ############################################
+        global testIndex
+        if self.startTest:
+            f = open('result.txt','w')
+            print >>f, "FILE OPENED\n"
+            startTest = False
+            testIndex = 0
+        else:
+            f = open('result.txt','a')
+        print >>f, "Current Function: getAction()"
+        print >>f,"Game won?", gameState.isWin()
+        print >>f,"Game lost?", gameState.isLose()
+        f.close()
+        ############################################
+        """
+        
+        self.maxDepth = self.depth
+        #Technically unneeded, but I prefer this variable
+        #name instead.
+        
+        self.agentTotal = gameState.getNumAgents()
+
+        """
+        STOP HITTING UNDO!!!
+        """
+
+        movesLeft = self.depth * self.agentTotal
+        bestMove = self.max_value(gameState, movesLeft)
+        
+        #print "bestMove:", bestMove
+
+        if self.statesExpanded == 0:
+            f = open('result.txt','w')
+            print >>f, "FILE OPENED\n"
+            f.close()
+        else:
+            f = open('result.txt','a')
+            print >>f,"States expanded:", self.statesExpanded
+            f.close()
+        
+
+        return bestMove[1]
+
+    def max_value(self, gameState, movesLeft):
+        global testIndex
+        testIndex += 1
+        self.statesExpanded += 1
+        
+        v = [-9999999, "Stop"]
+        returnValue = [-9999999, "Stop"]
+        gameDone = gameState.isLose() or gameState.isWin()
+        done = False
+
+        if gameDone or (movesLeft <= 0):
+            returnValue = [self.evaluationFunction(gameState), "Stop"]
+        else:
+            for action in gameState.getLegalActions(0):
+                v2 = self.min_value(gameState.generateSuccessor(0, action),
+                                        1, movesLeft - 1)
+                v2[1] = action
+                v = max(v, v2)
+            returnValue = v
+
+        return returnValue
+
+    def min_value(self, gameState, agent, movesLeft):
+        global testIndex
+        testIndex += 1
+        self.statesExpanded += 1
+        
+        v = [9999999, "Stop"]
+        returnValue = [9999999, "Stop"]
+        gameDone = gameState.isLose() or gameState.isWin()
+        modOp = (agent + 1) % self.agentTotal
+        
+
+        if gameDone:
+            returnValue = [self.evaluationFunction(gameState), "Stop"]
+        else:
+            for action in gameState.getLegalActions(agent):
+                if modOp == 0:
+                    v2 = self.max_value(gameState.generateSuccessor(agent, action),
+                                            movesLeft - 1)
+                else:
+                    v2 = self.min_value(gameState.generateSuccessor(agent, action),
+                                            modOp, movesLeft - 1)
+                v2[1] = action
+                v = min(v, v2)
+            returnValue = v
+
+        return returnValue
+    
         """
         self.maxDepth = self.depth
         #Technically unneeded, but I prefer this variable
@@ -518,100 +616,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         return returnValue
         """
-        
-
-        ############################################
-        # Setup for output to figure things out in #
-        #                getAction()               #
-        ############################################
-        global testIndex
-        if self.startTest:
-            f = open('result.txt','w')
-            print >>f, "FILE OPENED\n"
-            startTest = False
-            testIndex = 0
-        else:
-            f = open('result.txt','a')
-        print >>f, "Current Function: getAction()"
-        print >>f,"Game won?", gameState.isWin()
-        print >>f,"Game lost?", gameState.isLose()
-        f.close()
-        ############################################
-
-        self.maxDepth = self.depth
-        #Technically unneeded, but I prefer this variable
-        #name instead.
-        
-        self.agentTotal = gameState.getNumAgents()
-
-        """
-        STOP HITTING UNDO!!!
-        """
-
-        movesLeft = self.depth * self.agentTotal
-        bestMove = self.max_value(gameState, 0, movesLeft)
-        
-        #print "bestMove:", bestMove
-
-        return bestMove[1]
-
-    def max_value(self, gameState, agent, movesLeft):
-        global testIndex
-        testIndex += 1
-        v = [-9999999, "Stop"]
-        returnValue = [-9999999, "Stop"]
-        gameDone = gameState.isLose() or gameState.isWin()
-        done = False
-
-        if gameDone:
-            returnValue = [self.evaluationFunction(gameState), "Stop1"]
-        else:
-            if movesLeft <= 0:
-                returnValue = [self.evaluationFunction(gameState), "Stop2"]
-                done = True
-            if not done:
-                for action in gameState.getLegalActions(0):
-                    v2 = self.min_value(gameState.generateSuccessor(0, action),
-                                        1, movesLeft - 1)
-                    v2[1] = action
-                    v = max(v, v2)
-                
-        if not done:
-            returnValue = max(v, returnValue)
-
-        return returnValue
-
-    def min_value(self, gameState, agent, movesLeft):
-        global testIndex
-        testIndex += 1
-        v = [9999999, "Stop"]
-        returnValue = [9999999, "Stop"]
-        gameDone = gameState.isLose() or gameState.isWin()
-        modOp = (agent + 1) % self.agentTotal
-        done = False
-        
-
-        if gameDone:
-            returnValue = [self.evaluationFunction(gameState), "Stop3"]
-        else:
-            if not done:
-                for action in gameState.getLegalActions(modOp):
-                    if modOp == 0:
-                        v2 = self.max_value(gameState.generateSuccessor(0, action),
-                                            0, movesLeft - 1)
-                        v2[1] = action
-                        v = min(v, v2)
-                    else:
-                        v2 = self.min_value(gameState.generateSuccessor(modOp, action),
-                                            modOp, movesLeft - 1)
-                        v2[1] = action
-                        v = min(v, v2)
-                       
-
-        if not done:
-            returnValue = min(v, returnValue)
-
-        return returnValue    
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
