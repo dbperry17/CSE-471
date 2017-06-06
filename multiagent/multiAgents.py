@@ -20,10 +20,10 @@ import random, util
 from game import Agent
 
 #Following statements are for testing only
-testIndex = 0
-maxTest = 200
+#testIndex = 0
+#maxTest = 200
 
-#Next variable is needed for ReflexAgent()! DO NOT DELETE!
+#NOT A TESTING VARIABLE, DO NOT DELETE
 totalPath = []
 
 class ReflexAgent(Agent):
@@ -237,7 +237,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
       Your minimax agent (question 2)
     """
 
-    #Needed
+    #NOT A TESTING VARIABLE, DO NOT DELETE
     agentTotal = 0
 
     def getAction(self, gameState):
@@ -258,6 +258,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
             Returns the total number of agents in the game
         """
         "*** YOUR CODE HERE ***"
+        #Note:  REMEMBER TO COMMENT OUT THE NEXT LINE WHEN DONE
+        #util.raiseNotDefined()
+        
         
         self.agentTotal = gameState.getNumAgents()
 
@@ -308,6 +311,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             returnValue = v
 
         return returnValue
+    
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -319,7 +323,56 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
           Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        self.agentTotal = gameState.getNumAgents()
+
+        movesLeft = self.depth * self.agentTotal
+        bestMove = self.max_value(gameState, movesLeft, -9999999, 9999999)
+        
+        #print "bestMove:", bestMove        
+
+        return bestMove[1]
+
+    def max_value(self, gameState, movesLeft, alpha, beta):       
+        v = [-9999999, "Stop"]
+        gameDone = gameState.isLose() or gameState.isWin()
+
+        if gameDone or (movesLeft <= 0):
+            v = [self.evaluationFunction(gameState), "Stop"]
+            return v
+        else:
+            for action in gameState.getLegalActions(0):
+                v2 = self.min_value(gameState.generateSuccessor(0, action),
+                                        1, movesLeft - 1, alpha, beta)
+                v2[1] = action
+                v = max(v, v2)
+                if v[0] > beta:
+                    return v
+                alpha = max(alpha, v[0])
+            return v
+
+    def min_value(self, gameState, agent, movesLeft, alpha, beta):        
+        v = [9999999, "Stop"]
+        gameDone = gameState.isLose() or gameState.isWin()
+        modOp = (agent + 1) % self.agentTotal
+        
+        if gameDone:
+            v = [self.evaluationFunction(gameState), "Stop"]
+            return v
+        else:
+            for action in gameState.getLegalActions(agent):
+                if modOp == 0:
+                    v2 = self.max_value(gameState.generateSuccessor(agent, action),
+                                            movesLeft - 1, alpha, beta)
+                else:
+                    v2 = self.min_value(gameState.generateSuccessor(agent, action),
+                                            modOp, movesLeft - 1, alpha, beta)
+                v2[1] = action
+                v = min(v, v2)
+
+                if v[0] < alpha:
+                    return v
+                beta = min(beta, v[0])
+            return v
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
