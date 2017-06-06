@@ -27,13 +27,6 @@ try:
 except:
     pass
 
-#MY ADDITION! FOR TESTING ONLY!
-try:
-    os.system("TASKKILL /F /IM notepad.exe")
-except Exception, e:
-    print str(e)
-
-
 # register arguments and set default values
 def readCommand(argv):
     parser = optparse.OptionParser(description = 'Run public tests on student code')
